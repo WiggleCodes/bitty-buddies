@@ -322,8 +322,8 @@ app.whenReady().then(() => {
   createTray();
   setupUpdates();
 
-  // Check the revoke list now and every 30 minutes; a revoked key's pack locks straight away.
-  const recheck = () => licence.revalidate().then(result => { if (result === 'revoked') refreshUnlocks(); });
+  // Check the revoke list now and every 30 minutes; revoked packs lock and restored ones unlock again.
+  const recheck = () => licence.revalidate().then(result => { if (result === 'changed') refreshUnlocks(); });
   recheck();
   setInterval(recheck, 30 * 60 * 1000);
 });

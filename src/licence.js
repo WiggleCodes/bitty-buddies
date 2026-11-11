@@ -4,7 +4,8 @@
 // A key lists the packs it unlocks (e.g. "fantasy,elves"). When a customer buys
 // another pack they get an upgraded key with the same id and more packs, which
 // replaces their old one. Older single-pack keys still work.
-// On launch it also fetches revoked.json from GitHub; revoked keys are removed.
+// On launch (and every 30 minutes) it fetches revoked.json from GitHub. Revoked keys are
+// kept but paused, so if a key is restored it starts working again on the next check.
 const { app } = require('electron');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -12,6 +13,9 @@ const path = require('path');
 const pkg = require('../package.json');
 
 const REVOKED_URL = (pkg.bitty && pkg.bitty.revokedUrl) || '';
+// The GitHub API serves the latest file straight away; raw.githubusercontent.com can be a
+// few minutes behind, so it's only the fallback (e.g. if the API rate limit is hit).
+const REVOKED_API = (pkg.bitty && pkg.bitty.revokedApi) || '';
 
 let publicKey = null;
 try {
@@ -59,7 +63,7 @@ function load() {
     const raw = Array.isArray(data.keys) ? data.keys : data.key ? [data.key] : [];
     for (const key of raw) {
       const v = verify(key);
-      if (v && !revokedCache.includes(v.id)) addKey({ key, ...v });
+      if (v) addKey({ key, ...v });
     }
   } catch { /* no licences yet */ }
 }
@@ -68,21 +72,29 @@ function save() {
   fs.writeFileSync(licenceFile(), JSON.stringify({ keys: keys.map(k => k.key), revokedCache }), { mode: 0o600 });
 }
 
-async function fetchRevoked() {
-  if (!REVOKED_URL) return null;
+async function getList(url, headers) {
   try {
-    const res = await fetch(`${REVOKED_URL}?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    const res = await fetch(url, { cache: 'no-store', headers, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     const data = await res.json();
     return Array.isArray(data.revoked) ? data.revoked : null;
-  } catch { return null; } // offline: keep the unlocks
+  } catch { return null; }
 }
+
+async function fetchRevoked() {
+  let list = null;
+  if (REVOKED_API) list = await getList(`${REVOKED_API}?t=${Date.now()}`, { Accept: 'application/vnd.github.raw+json' });
+  if (!list && REVOKED_URL) list = await getList(`${REVOKED_URL}?t=${Date.now()}`);
+  return list; // null when offline: keep the current unlocks
+}
+
+const live = () => keys.filter(k => !revokedCache.includes(k.id));
 
 module.exports = {
   load,
   configured: () => !!publicKey,
-  status: () => ({ active: keys.length > 0, packs: [...new Set(keys.flatMap(k => k.packs))], keys: keys.map(k => ({ id: k.id, packs: k.packs })) }),
-  isUnlocked: packId => keys.some(k => k.packs.includes(packId)),
+  status: () => ({ active: live().length > 0, packs: [...new Set(live().flatMap(k => k.packs))], keys: live().map(k => ({ id: k.id, packs: k.packs })) }),
+  isUnlocked: packId => live().some(k => k.packs.includes(packId)),
 
   async activate(rawKey) {
     if (!publicKey) throw new Error('Licence keys aren’t set up in this build yet.');
@@ -90,11 +102,11 @@ module.exports = {
     if (!key) throw new Error('Paste your licence key first.');
     const v = verify(key);
     if (!v) throw new Error('That licence key isn’t valid. Check you copied all of it.');
-    const old = keys.find(k => k.id === v.id);
-    if (old && old.packs.length >= v.packs.length && old.date >= v.date) throw new Error('That key is already active on this computer.');
     const revoked = await fetchRevoked();
     if (revoked) revokedCache = revoked;
-    if (revokedCache.includes(v.id)) throw new Error('This licence key has been revoked.');
+    if (revokedCache.includes(v.id)) { save(); throw new Error('This licence key has been revoked.'); }
+    const old = keys.find(k => k.id === v.id);
+    if (old && old.packs.length >= v.packs.length && old.date >= v.date) { save(); throw new Error('That key is already active on this computer.'); }
     addKey({ key, ...v });
     save();
     // Report only what's new, so an upgrade says "Unlocked Elves" not everything.
@@ -102,16 +114,15 @@ module.exports = {
     return fresh.length ? fresh : v.packs;
   },
 
-  // Returns 'ok', 'none', 'offline' (kept) or 'revoked' (one or more keys removed).
+  // Returns 'ok', 'none', 'offline' (nothing changed) or 'changed' (a key was revoked or restored).
   async revalidate() {
     if (!keys.length) return 'none';
     const revoked = await fetchRevoked();
     if (!revoked) return 'offline';
+    const before = live().map(k => k.id).join();
     revokedCache = revoked;
-    const before = keys.length;
-    keys = keys.filter(k => !revoked.includes(k.id));
     save();
-    return keys.length < before ? 'revoked' : 'ok';
+    return live().map(k => k.id).join() === before ? 'ok' : 'changed';
   },
 
   async remove(id) {

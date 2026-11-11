@@ -60,6 +60,7 @@
     }
   },
   "bitty": {
-    "revokedUrl": "https://raw.githubusercontent.com/WiggleCodes/bitty-buddies/main/revoked.json"
+    "revokedUrl": "https://raw.githubusercontent.com/WiggleCodes/bitty-buddies/main/revoked.json",
+    "revokedApi": "https://api.github.com/repos/WiggleCodes/bitty-buddies/contents/revoked.json"
   }
 }
