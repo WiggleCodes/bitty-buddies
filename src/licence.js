@@ -1,5 +1,5 @@
 // Licence handling in the app's main process. No server needed.
-// Keys are signed on the developer's own computer (tools/licence-keys.js); the app checks
+// Keys are signed privately by WiggleCodes; the app checks
 // the signature with the public key in licence-public.pem, so it works fully offline.
 // On launch it also fetches revoked.json from GitHub; a revoked key is removed.
 const { app } = require('electron');
