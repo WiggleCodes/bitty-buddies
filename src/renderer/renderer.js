@@ -76,8 +76,8 @@
   }
 
   // States where a pet is doing its own thing and shouldn't be pulled into games.
-  const LOCKED = ['held', 'ride', 'leap', 'climb', 'cling', 'battle', 'fall', 'dizzy', 'cheer', 'eat'];
-  const MOVERS = ['walk', 'chase', 'fetch', 'snack', 'conga', 'toWall'];
+  const LOCKED = ['held', 'ride', 'leap', 'climb', 'cling', 'battle', 'fall', 'dizzy', 'cheer', 'eat', 'carried', 'goGrab', 'haul'];
+  const MOVERS = ['walk', 'chase', 'fetch', 'snack', 'conga', 'toWall', 'goGrab', 'haul'];
 
   // ---------- things (pets + builds) ----------
   class Thing {
@@ -98,6 +98,7 @@
       this.bubble = null; this.target = null;
       this.side = 0; this.cy = 0; this.climbTo = 0;
       this.lunge = 0; this.knockT = 0; this.offX = 0;
+      this.carry = null; this.goal = 0; this.carrier = null;
     }
     wpx() { return this.def.w * scale; }
     hpx() { return this.def.h * scale; }
@@ -132,6 +133,12 @@
     }
     say(icon, dur = 1.6) { this.bubble = { icon, until: clock + dur }; }
     set(state, dur) {
+      if (this.carry && state !== 'goGrab' && state !== 'haul') {   // interrupted mid-carry: let go
+        const c = this.carry;
+        this.carry = null;
+        if (c.kind === 'treat' && c.obj.claimed === this) { c.obj.claimed = null; c.obj.carried = false; c.obj.landed = false; }
+        if (c.kind === 'ball' && c.obj.carrier === this) c.obj.carrier = null;
+      }
       if (this.target && this.target.claimed === this) this.target.claimed = null;
       this.target = null;
       this.state = state;
@@ -154,6 +161,7 @@
       if (mischief) {
         if (r < 0.08 && mouse.seen && clock - mouse.t < 5) { this.say('!'); return this.set('chase', rand(5, 9)); }
         if (r < 0.13) { this.dir = this.x < W() / 2 ? -1 : 1; return this.set('toWall', 15); }
+        if (r < 0.19 && startGrab(this)) return;
       }
       if (r < 0.5) this.set('walk', rand(2, 7));
       else if (r < 0.72) { this.set('idle', rand(2, 5)); if (Math.random() < 0.25) this.say(pick(['?', '♪', '❤'])); }
@@ -184,6 +192,11 @@
       const ground = H(), maxX = Math.max(0, W() - this.wpx());
       const S = this.state;
 
+      if (S === 'carried') {
+        const c = this.carrier;
+        if (!c || !things.includes(c) || c.state !== 'haul' || !c.carry || c.carry.obj !== this) { this.carrier = null; this.vy = 0; this.vx = 0; this.state = 'fall'; }
+        return;
+      }
       if (S === 'held' || S === 'battle' || S === 'conga') return;
 
       if (S === 'ride') {                      // dangling from the mouse pointer
@@ -297,6 +310,16 @@
           this.set('sit', rand(2, 4));
         }
         return;
+      } else if (S === 'goGrab' || S === 'haul') {
+        if (!carryStillValid(this)) { this.carry = null; return this.next(); }
+        const tx = S === 'goGrab' ? carryX(this.carry) : this.goal + this.wpx() / 2;
+        const dx = tx - (this.x + this.wpx() / 2);
+        if (Math.abs(dx) > 2 * scale) {
+          this.dir = Math.sign(dx);
+          this.x += this.dir * (S === 'goGrab' ? this.runSpeed() : this.walkSpeed() * 1.2) * dt;
+        }
+        if (S === 'goGrab' && Math.abs(dx) < Math.max(3 * scale, this.wpx() / 4)) pickUp(this);
+        else if (S === 'haul' && (Math.abs(dx) <= 2 * scale || this.timer < 0.1)) { putDown(this); return; }
       } else if (S === 'dance') {
         this.dir = (Math.floor(clock * 2) + this.uid) % 2 ? 1 : -1;
       } else if (S === 'sleep') {
@@ -385,7 +408,7 @@
   function updateBall(dt) {
     if (!ball) return;
     const r = 3 * scale, floor = H() - r;
-    if (ball.held) return;
+    if (ball.held || ball.carrier) return;
     ball.vy += 1800 * dt; ball.x += ball.vx * dt; ball.y += ball.vy * dt;
     if (ball.y > floor) {
       ball.y = floor;
@@ -420,6 +443,7 @@
   function updateTreats(dt) {
     for (let i = treats.length - 1; i >= 0; i--) {
       const t = treats[i];
+      if (t.carried) continue;
       if (!t.landed) {
         t.vy += 1600 * dt; t.y += t.vy * dt;
         if (t.y >= H()) { t.y = H(); t.landed = true; dust(t.x, H(), 3); }
@@ -434,6 +458,94 @@
         const tr = nearestTreat(p);
         if (tr) { p.set('snack', 14); p.target = tr; tr.claimed = p; }
       }
+    }
+  }
+
+
+  // ---------- carrying things around ----------
+  // A carry is { kind: 'thing' | 'treat' | 'ball', obj }.
+  function carryX(c) {
+    if (c.kind === 'thing') return c.obj.x + c.obj.wpx() / 2;
+    return c.obj.x;
+  }
+  function carryStillValid(p) {
+    const c = p.carry;
+    if (!c) return false;
+    if (c.kind === 'thing') {
+      if (!things.includes(c.obj)) return false;
+      if (p.state === 'haul') return c.obj.state === 'carried' && c.obj.carrier === p;
+      return !c.obj.carrier && !LOCKED.includes(c.obj.state);
+    }
+    if (c.kind === 'treat') return treats.includes(c.obj) && c.obj.claimed === p;
+    if (c.kind === 'ball') return ball === c.obj && !ball.held && (p.state === 'goGrab' ? !ball.carrier : ball.carrier === p);
+    return false;
+  }
+  function grabTargets(p) {
+    const list = [];
+    for (const t of things) {
+      if (t === p || t.carrier || LOCKED.includes(t.state)) continue;
+      if (things.some(o => o.carry && o.carry.obj === t)) continue;
+      list.push({ kind: 'thing', obj: t });
+    }
+    for (const tr of treats) if (!tr.claimed && tr.landed) list.push({ kind: 'treat', obj: tr });
+    if (ball && !ball.held && !ball.carrier && !things.some(o => o.carry && o.carry.obj === ball)) list.push({ kind: 'ball', obj: ball });
+    return list;
+  }
+  function startGrab(p) {
+    if (!p || p.isBuild || LOCKED.includes(p.state) || p.y < H() - 1) return false;
+    const options = grabTargets(p);
+    if (!options.length) return false;
+    const c = pick(options);
+    p.set('goGrab', 12);
+    p.carry = c;
+    if (c.kind === 'treat') c.obj.claimed = p;
+    p.say('!', 1);
+    return true;
+  }
+  function pickUp(p) {
+    const c = p.carry;
+    if (c.kind === 'thing') {
+      const o = c.obj;
+      if (o.state === 'battle' || o.state === 'conga') { p.carry = null; return p.next(); }
+      o.set('carried', 99); o.carrier = p;
+      if (!o.isBuild) o.say(pick(['!', '❤', '?']), 1.4);
+    } else if (c.kind === 'treat') c.obj.carried = true;
+    else if (c.kind === 'ball') c.obj.carrier = p;
+    p.state = 'haul';
+    p.timer = 14;
+    let goal;
+    for (let k = 0; k < 6; k++) { goal = rand(0, Math.max(0, W() - p.wpx())); if (Math.abs(goal - p.x) > 160) break; }
+    p.goal = goal;
+    p.say('♪', 1.2);
+    dust(p.x + p.wpx() / 2, H(), 3);
+  }
+  function putDown(p) {
+    const c = p.carry;
+    p.carry = null;
+    if (c && c.kind === 'thing' && things.includes(c.obj)) {
+      const o = c.obj;
+      o.carrier = null;
+      o.vx = p.dir * rand(60, 160); o.vy = -rand(150, 300);
+      o.state = 'fall';
+      if (o.isBuild) setTimeout(report, 1500);
+    } else if (c && c.kind === 'treat' && treats.includes(c.obj)) {
+      c.obj.carried = false; c.obj.landed = false; c.obj.vy = -220; c.obj.claimed = null;
+    } else if (c && c.kind === 'ball' && ball === c.obj) {
+      ball.carrier = null; ball.vx = p.dir * 320; ball.vy = -420;
+    }
+    heart(p);
+    p.set('idle', rand(1.5, 3));
+  }
+  function positionCarried() {
+    for (const p of things) {
+      if (p.state !== 'haul' || !p.carry) continue;
+      const c = p.carry, cx = p.x + p.wpx() / 2, head = p.top() + scale;
+      if (c.kind === 'thing' && c.obj.state === 'carried') {
+        c.obj.x = cx - c.obj.wpx() / 2;
+        c.obj.y = head;                               // its feet sit on the carrier's head
+        if (!c.obj.isBuild) c.obj.dir = p.dir;
+      } else if (c.kind === 'treat') { c.obj.x = cx; c.obj.y = head; }
+      else if (c.kind === 'ball') { c.obj.x = cx; c.obj.y = head - 3 * scale; }
     }
   }
 
@@ -586,7 +698,7 @@
 
     const list = sorted();
     for (const t of list) {
-      if (t.state === 'ride') continue;          // drawn last, on top of everything
+      if (t.state === 'ride' || t.state === 'carried') continue; // drawn last, on top
       if (!t.isBuild && !['climb', 'cling'].includes(t.state)) {
         const lift = Math.max(0, H() - t.y - t.bounce());
         const k = Math.min(1, lift / (30 * scale));
@@ -611,6 +723,7 @@
       patternC(BALL, ball.x - 3 * scale, ball.y - 3 * scale, scale);
     }
 
+    for (const t of list) if (t.state === 'carried') drawThing(t);
     for (const t of list) if (t.state === 'ride') drawThing(t);
 
     const px = Math.max(2, Math.round(scale / 2));
@@ -681,7 +794,7 @@
       drag.vx = drag.vx * 0.5 + ((e.clientX - drag.lx) / dtm) * 500;
       drag.vy = drag.vy * 0.5 + ((e.clientY - drag.ly) / dtm) * 500;
       drag.lx = e.clientX; drag.ly = e.clientY; drag.lt = performance.now();
-      if (drag.ball) { ball.held = true; ball.x = e.clientX; ball.y = Math.min(e.clientY, H() - 3 * scale); return; }
+      if (drag.ball) { ball.carrier = null; ball.held = true; ball.x = e.clientX; ball.y = Math.min(e.clientY, H() - 3 * scale); return; }
       t.state = 'held';
       if (!t.isBuild && Math.abs(drag.vx) > 20) t.dir = drag.vx > 0 ? 1 : -1;
       t.x = clamp(e.clientX - drag.ox, 0, Math.max(0, W() - t.wpx()));
@@ -786,6 +899,7 @@
     else if (action === 'treats') dropTreats(3);
     else if (action === 'party') party();
     else if (action === 'conga') startConga();
+    else if (action === 'tidy') pets().forEach(p => startGrab(p));
   });
   api.on('thing-action', ({ uid, action }) => {
     const t = things.find(x => x.uid === uid);
@@ -797,6 +911,7 @@
       startBattle(t, other);
     } else if (action === 'chase') { t.say('!'); t.set('chase', rand(8, 12)); }
     else if (action === 'climb') { t.dir = t.x < W() / 2 ? -1 : 1; t.set('toWall', 15); }
+    else if (action === 'grab') { if (!startGrab(t)) t.say('?', 1.2); }
     else t.set(action, action === 'sleep' ? rand(10, 20) : action === 'sit' ? rand(6, 12) : rand(4, 8));
   });
 
@@ -816,6 +931,7 @@
     updateBattles(dt);
     updateConga(dt);
     updateBall(dt);
+    positionCarried();
     updateTreats(dt);
     socialise();
 

@@ -170,6 +170,7 @@ ipcMain.on('thing-menu', (_e, { uid, id }) => {
     tpl.push({ label: 'Go for a walk', click: () => send('thing-action', { uid, action: 'walk' }) });
     tpl.push({ label: 'Chase the mouse', click: () => send('thing-action', { uid, action: 'chase' }) });
     tpl.push({ label: 'Climb the wall', click: () => send('thing-action', { uid, action: 'climb' }) });
+    tpl.push({ label: 'Pick something up', click: () => send('thing-action', { uid, action: 'grab' }) });
     tpl.push({ label: 'Start a battle!', click: () => send('thing-action', { uid, action: 'battle' }) });
     tpl.push({ type: 'separator' });
   }
@@ -209,6 +210,7 @@ function buildTrayMenu() {
         { label: 'Drop some treats', click: () => send('play', 'treats') },
         { label: 'Dance party!', click: () => send('play', 'party') },
         { label: 'Conga line!', click: () => send('play', 'conga') },
+        { label: 'Move things around!', click: () => send('play', 'tidy') },
         { type: 'separator' },
         {
           label: 'Mischief (chasing, climbing, scraps)', type: 'checkbox', checked: settings.mischief,
@@ -319,11 +321,10 @@ app.whenReady().then(() => {
   createTray();
   setupUpdates();
 
-  // Quietly re-check the licence with the server. Offline? Keep the cached unlock.
-  const before = JSON.stringify(licence.status().packs);
-  licence.revalidate().then(result => {
-    if (result === 'revoked' || JSON.stringify(licence.status().packs) !== before) refreshUnlocks();
-  });
+  // Check the revoke list now and every 30 minutes; a revoked key's pack locks straight away.
+  const recheck = () => licence.revalidate().then(result => { if (result === 'revoked') refreshUnlocks(); });
+  recheck();
+  setInterval(recheck, 30 * 60 * 1000);
 });
 
 app.on('second-instance', () => {

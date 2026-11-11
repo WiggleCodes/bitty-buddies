@@ -57,7 +57,7 @@ function save() {
 async function fetchRevoked() {
   if (!REVOKED_URL) return null;
   try {
-    const res = await fetch(REVOKED_URL, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${REVOKED_URL}?t=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     const data = await res.json();
     return Array.isArray(data.revoked) ? data.revoked : null;
