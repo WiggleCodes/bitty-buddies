@@ -42,26 +42,7 @@ To publish it, go to the repo's **Settings → Pages**, set **Source** to **GitH
 
 ## Licence keys (locked packs)
 
-Packs marked `licensed: true` (Fantasy Folk for now) show as 🔒 in the Spawn menu until a key covering them is entered through the tray's **Enter licence key…**. There's no server: you make keys on your own computer, and the app checks each key's digital signature offline.
-
-**One-time setup**
-```bash
-npm run keys -- init
-```
-This saves your private signing key to `~/.bitty-buddies-licence/`, outside the repo, and writes the matching public key to `src/licence-public.pem`. Commit the public key, but **never commit or share the private key**: anyone who has it can make keys. Back it up, because if you lose it you'd need new keys and a new app release.
-
-**Making and managing keys**
-```bash
-npm run keys -- create --packs fantasy --note "Sam, paid 12 Nov"
-npm run keys -- create --packs '*'           # every licensed pack, including future ones
-npm run keys -- list
-npm run keys -- revoke <id or key>           # then commit + push revoked.json
-```
-Send the whole `BITTY-…` key to the buyer. To revoke one, the tool adds its id to `revoked.json`. Once you push that to `main`, apps fetch it from GitHub on launch and lock the pack again. Offline apps keep working until they next get online.
-
-Limits of this approach: a key isn't tied to one computer, so a shared key works anywhere until you revoke it.
-
-To lock any other pack, add `licensed: true` next to its `name`, then make keys with `--packs <pack-id>`.
+Some packs (Fantasy Folk for now) show as 🔒 in the Spawn menu until a licence key is entered through the tray's **Enter licence key…**. Licence keys are issued by WiggleCodes only.
 
 ## Adding your own category (packs)
 
@@ -91,10 +72,8 @@ Item fields:
 
 ```
 src/main.js            tray, overlay window, settings, auto-update
-src/licence.js         offline key checks + revoke list
+src/licence.js         licence key checks
 src/licence-window/    the "Enter licence key" window
-tools/licence-keys.js  makes, lists and revokes licence keys (npm run keys)
-revoked.json           revoked key ids, read by the app from GitHub
 site/                  the website (published by .github/workflows/pages.yml)
 src/preload.js         safe bridge between main and the overlay
 src/renderer/          the overlay: physics, behaviour, drawing, mouse handling

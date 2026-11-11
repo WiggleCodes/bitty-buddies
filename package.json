@@ -76,7 +76,11 @@
       ],
       "extendInfo": {
         "LSUIElement": true
-      }
+      },
+      "artifactName": "Bitty-Buddies-${version}-${arch}-mac.${ext}"
+    },
+    "dmg": {
+      "artifactName": "Bitty-Buddies-${version}-${arch}.${ext}"
     }
   },
   "bitty": {
