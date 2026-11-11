@@ -10,6 +10,11 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      move_tag:
+        description: Rebuild the current version in place (moves its tag to the latest commit)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -27,7 +32,12 @@ jobs:
           TAG="v$(node -p "require('./package.json').version")"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
-            echo "$TAG already exists"
+            if [ "${{ inputs.move_tag }}" = "true" ]; then
+              git tag -f "$TAG" && git push -f origin "refs/tags/$TAG"
+              echo "Moved $TAG to $(git rev-parse --short HEAD)"
+            else
+              echo "$TAG already exists"
+            fi
           else
             git tag "$TAG" && git push origin "$TAG"
           fi
