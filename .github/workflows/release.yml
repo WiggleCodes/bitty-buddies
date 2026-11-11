@@ -40,12 +40,14 @@ jobs:
             echo "$TAG is already released; nothing to do"
           elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
             git tag -f "$TAG" && git push -f origin "refs/tags/$TAG"
+            if [ -f "release-notes/$TAG.md" ]; then gh release edit "$TAG" --notes-file "release-notes/$TAG.md" || true; fi
             echo "inplace=true" >> "$GITHUB_OUTPUT"
             echo "Rebuilding $TAG in place at $(git rev-parse --short HEAD)"
           else
             git tag "$TAG" && git push origin "$TAG"
             # Create the release once here; the Windows build adds its files to it.
-            gh release create "$TAG" --title "$TAG" --notes "Bitty Buddies $TAG" --verify-tag
+            if [ -f "release-notes/$TAG.md" ]; then NOTES=(--notes-file "release-notes/$TAG.md"); else NOTES=(--notes "Bitty Buddies $TAG"); fi
+            gh release create "$TAG" --title "Bitty Buddies $TAG" "${NOTES[@]}" --verify-tag
             echo "inplace=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -88,6 +90,9 @@ jobs:
     if: needs.tag.outputs.skip != 'true' && needs.tag.outputs.inplace != 'true'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.tag }}
       - name: Post to Discord
         env:
           WEBHOOK: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
@@ -95,13 +100,15 @@ jobs:
         run: |
           if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret; skipping"; exit 0; fi
           URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
-          jq -n --arg tag "$TAG" --arg url "$URL" '{
+          NOTES="Your app will update itself next time it checks. New here? Grab it from the link above."
+          if [ -f "release-notes/$TAG.md" ]; then NOTES="$(tail -n +2 "release-notes/$TAG.md" | head -c 3800)"; fi
+          jq -n --arg tag "$TAG" --arg url "$URL" --arg notes "$NOTES" '{
             username: "Bitty Buddies",
             avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
             embeds: [{
               title: ("🆕 Bitty Buddies " + $tag + " is out!"),
               url: $url,
-              description: "Your app will update itself next time it checks. New here? Grab it from the link above.",
+              description: $notes,
               color: 7126606
             }]
           }' > payload.json
