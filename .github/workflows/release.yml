@@ -80,3 +80,28 @@ jobs:
           files=(dist/*.exe dist/*.blockmap dist/latest*.yml)
           ls -l "${files[@]}"
           gh release upload "${{ needs.tag.outputs.tag }}" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+
+  # Posts new versions to the Discord #updates channel (skipped for in-place rebuilds).
+  # Needs a repo secret called DISCORD_UPDATES_WEBHOOK holding the channel's webhook URL.
+  announce:
+    needs: [tag, build]
+    if: needs.tag.outputs.skip != 'true' && needs.tag.outputs.inplace != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
+          TAG: ${{ needs.tag.outputs.tag }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret; skipping"; exit 0; fi
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
+          jq -n --arg tag "$TAG" --arg url "$URL" '{
+            username: "Bitty Buddies",
+            embeds: [{
+              title: ("🆕 Bitty Buddies " + $tag + " is out!"),
+              url: $url,
+              description: "Your app will update itself next time it checks. New here? Grab it from the link above.",
+              color: 7126606
+            }]
+          }' > payload.json
+          curl -fsS -H "Content-Type: application/json" -d @payload.json "$WEBHOOK"
