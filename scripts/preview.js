@@ -17,7 +17,7 @@ for (const f of packFiles) {
   const pack = require(path.join('../src/packs', f));
   for (const item of Object.values(pack.items)) rows.push(withDefaults(item));
 }
-const cellW = 24 * SCALE + PAD, cellH = 24 * SCALE + PAD;
+const cellW = 32 * SCALE + PAD, cellH = 32 * SCALE + PAD;
 const png = new PNG({ width: cellW * poses.length + PAD, height: cellH * rows.length + PAD });
 for (let i = 0; i < png.data.length; i += 4) png.data.set([200, 214, 230, 255], i);
 
@@ -26,7 +26,7 @@ function hex(c) { const n = parseInt(c.slice(1), 16); return [n >> 16, (n >> 8) 
 rows.forEach((def, r) => {
   poses.forEach((st, k) => {
     const g = drawItem(def, st);
-    const ox = PAD + k * cellW + (24 - def.w) * SCALE / 2, oy = PAD + r * cellH + (24 - def.h) * SCALE;
+    const ox = PAD + k * cellW + (32 - def.w) * SCALE / 2, oy = PAD + r * cellH + (32 - def.h) * SCALE;
     g.forEach((row, y) => row.forEach((col, x) => {
       if (!col) return;
       const [R, G, B] = hex(col);

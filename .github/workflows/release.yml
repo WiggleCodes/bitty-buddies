@@ -1,20 +1,15 @@
 # Builds Windows + macOS installers and publishes them to a GitHub Release.
-# Installed apps auto-update from these releases.
 #
-# To release: bump "version" in package.json, push to main, then either
-#   - Actions tab → Release → Run workflow (the tag v<version> is created for you), or
-#   - push a tag yourself: git tag v1.0.1 && git push origin v1.0.1
+# Actions tab → Release → Run workflow:
+#   - if package.json's version has no release yet, it tags it and publishes a new release
+#   - if it already has one, it rebuilds that version in place and replaces its downloads
+# Pushing a v* tag yourself also publishes.
 name: Release
 
 on:
   push:
     tags: ['v*']
   workflow_dispatch:
-    inputs:
-      move_tag:
-        description: Rebuild the current version in place (moves its tag to the latest commit)
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -24,22 +19,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
+      inplace: ${{ steps.tag.outputs.inplace }}
     steps:
       - uses: actions/checkout@v4
       - id: tag
-        name: Create the version tag if needed
+        name: Create or move the version tag
         run: |
           TAG="v$(node -p "require('./package.json').version")"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
-            if [ "${{ inputs.move_tag }}" = "true" ]; then
-              git tag -f "$TAG" && git push -f origin "refs/tags/$TAG"
-              echo "Moved $TAG to $(git rev-parse --short HEAD)"
-            else
-              echo "$TAG already exists"
-            fi
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "inplace=false" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            git tag -f "$TAG" && git push -f origin "refs/tags/$TAG"
+            echo "inplace=true" >> "$GITHUB_OUTPUT"
+            echo "Rebuilding $TAG in place at $(git rev-parse --short HEAD)"
           else
             git tag "$TAG" && git push origin "$TAG"
+            echo "inplace=false" >> "$GITHUB_OUTPUT"
           fi
 
   build:
@@ -49,6 +45,11 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # No Apple certificate yet: build unsigned. Add CSC_LINK / CSC_KEY_PASSWORD /
+      # APPLE_ID secrets later and remove this line to sign + notarise.
+      CSC_IDENTITY_AUTO_DISCOVERY: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -61,10 +62,16 @@ jobs:
 
       - run: npm ci
 
-      - name: Build and publish
+      - name: Build and publish a new release
+        if: needs.tag.outputs.inplace != 'true'
         run: npx electron-builder --publish always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No Apple certificate yet: build unsigned. Add CSC_LINK / CSC_KEY_PASSWORD /
-          # APPLE_ID secrets later and remove this line to sign + notarise.
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Build and replace the existing release's downloads
+        if: needs.tag.outputs.inplace == 'true'
+        shell: bash
+        run: |
+          npx electron-builder --publish never
+          shopt -s nullglob
+          files=(dist/*.exe dist/*.dmg dist/*.zip dist/*.blockmap dist/latest*.yml)
+          ls -l "${files[@]}"
+          gh release upload "${{ needs.tag.outputs.tag }}" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"

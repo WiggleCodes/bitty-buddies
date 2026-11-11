@@ -55,7 +55,8 @@
     },
     "nsis": {
       "oneClick": true,
-      "perMachine": false
+      "perMachine": false,
+      "artifactName": "Bitty-Buddies-Setup-${version}.${ext}"
     },
     "mac": {
       "category": "public.app-category.entertainment",

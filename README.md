@@ -17,7 +17,7 @@ npm start
 Everything lives in the **tray / menu-bar icon** (the little dog):
 
 - **Spawn** → pick a category (Critters, Fantasy Folk) → pick a pet
-- **Build** → Shrine, Campfire, Lantern Post
+- **Build** → Shrine, Campfire, Lantern Post, plus Burrow Cottage, Wizard's Tower, Dwarf Forge and Treehouse with a Fantasy Folk licence key
 - **Play** → Start a battle, Throw a ball, Drop some treats, Dance party, Conga line, plus a **Mischief** toggle for the things pets do on their own (chasing your cursor, climbing the screen edges, little scraps)
 - **Clear**, **Hide everything**, **Size**, **Start with computer**, **Check for updates…**
 
