@@ -7,7 +7,7 @@
 
 Blocky pixel pets that wander along the bottom of your screen, plus little builds they like to nap beside. For Windows, and it keeps itself up to date.
 
-**[Download Bitty Buddies](https://github.com/WiggleCodes/bitty-buddies/releases/latest)** · **[Website](https://wigglecodes.github.io/bitty-buddies/)**
+**[Download Bitty Buddies](https://github.com/WiggleCodes/bitty-buddies/releases/latest)** · **[Website](https://wigglecodes.github.io/bitty-buddies/)** · **[Discord](https://discord.gg/aCHyjABJG7)** · **[Ko-fi](https://ko-fi.com/bittybuddies)**
 
 ## What they get up to
 

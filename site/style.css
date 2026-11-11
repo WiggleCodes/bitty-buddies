@@ -74,6 +74,9 @@ h1 {
 .price-list li { margin: .3rem 0; }
 .inventory.compact { margin-top: .8rem; max-width: none; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; padding: 6px; }
 .btn.gold { background: #E7B93C; }
+.btn.discord { background: #5865F2; }
+.bedrock .links { display: flex; gap: 18px; flex-wrap: wrap; }
+.price-card.soon a { font-weight: 700; }
 .price-card.soon { background: #DCE3EA; box-shadow: 6px 6px 0 rgba(0, 0, 0, .25); }
 .price-card.soon h3 { margin-top: 0; }
 .price-card.soon p { margin: 0; }
