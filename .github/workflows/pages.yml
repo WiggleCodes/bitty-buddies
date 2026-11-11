@@ -1,0 +1,44 @@
+# Publishes the website in site/ to GitHub Pages, using the app's real sprites.
+# One-time setup: repo Settings → Pages → Source: "GitHub Actions".
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', 'src/packs/**', 'src/shared/**', '.github/banner.png', 'build/icon.png', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/js/packs
+          cp -r site/. _site/
+          cp src/shared/pixel.js _site/js/
+          cp src/packs/*.js _site/js/packs/
+          rm _site/js/packs/index.js
+          cp .github/banner.png _site/banner.png
+          cp build/icon.png _site/icon.png
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

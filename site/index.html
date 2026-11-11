@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bitty Buddies: pixel pets for your desktop</title>
+  <meta name="description" content="Tiny pixel pets that wander along the bottom of your screen. Free for Windows and macOS.">
+  <meta property="og:title" content="Bitty Buddies">
+  <meta property="og:description" content="Tiny pixel pets that wander along the bottom of your screen.">
+  <meta property="og:image" content="banner.png">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero" id="top">
+    <div class="clouds" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <h1>Bitty Buddies</h1>
+      <p class="tagline">Tiny pixel pets that wander along the bottom of your screen while you work.</p>
+      <div class="cta">
+        <a class="btn grass" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest">Download for Windows</a>
+        <a class="btn stone" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest">Download for Mac</a>
+      </div>
+      <p class="small">Free, and it updates itself.</p>
+    </div>
+    <canvas id="meadow" aria-label="Pixel pets wandering on grass. Click one to make it jump, or drag to throw it."></canvas>
+    <p class="hint" aria-hidden="true">Psst, click a buddy. Or pick one up.</p>
+  </header>
+
+  <main>
+    <section class="layer dirt" id="buddies">
+      <div class="wrap">
+        <h2>Meet the buddies</h2>
+        <p class="lede">Spawn as many as you like from the tray menu. Each one has its own walk, nap and personality.</p>
+
+        <h3>Critters</h3>
+        <div class="inventory" data-pack="critters"></div>
+
+        <h3>Fantasy Folk <span class="lock">🔒 Unlocks with a licence key</span></h3>
+        <div class="inventory" data-pack="fantasy"></div>
+
+        <h3>Builds</h3>
+        <div class="inventory builds" data-pack="builds"></div>
+        <p class="detail" id="detail" aria-live="polite">Hover or tap a slot to see who's who.</p>
+      </div>
+    </section>
+
+    <section class="layer deep-dirt" id="features">
+      <div class="wrap">
+        <h2>They live on your desktop</h2>
+        <ul class="features">
+          <li><strong>Click to say hi.</strong> Buddies jump and pop a heart.</li>
+          <li><strong>Pick them up.</strong> Drag a buddy anywhere and fling it. It'll bounce.</li>
+          <li><strong>Build a little camp.</strong> Place a shrine, campfire or lantern and watch pets curl up beside it.</li>
+          <li><strong>Out of your way.</strong> Clicks pass straight through to whatever's underneath.</li>
+          <li><strong>Always fresh.</strong> New versions download and install on their own.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="layer stone-layer" id="start">
+      <div class="wrap">
+        <h2>Get started</h2>
+        <ol class="steps">
+          <li><span class="n">1</span><div><strong>Download</strong> the installer for Windows or Mac from the latest release.</div></li>
+          <li><span class="n">2</span><div><strong>Find the little dog</strong> in your system tray or menu bar.</div></li>
+          <li><span class="n">3</span><div><strong>Spawn a buddy</strong> from the Spawn menu, and you're done.</div></li>
+        </ol>
+        <a class="btn grass big" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest">Get Bitty Buddies</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bedrock">
+    <div class="wrap">
+      <p>© 2026 WiggleCodes. All rights reserved. The code is public to read, not to copy or re-upload.</p>
+      <p><a href="https://github.com/WiggleCodes/bitty-buddies">View on GitHub</a></p>
+    </div>
+  </footer>
+
+  <script src="js/pixel.js"></script>
+  <script src="js/packs/critters.js"></script>
+  <script src="js/packs/fantasy.js"></script>
+  <script src="js/packs/builds.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>

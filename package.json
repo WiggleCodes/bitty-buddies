@@ -1,0 +1,85 @@
+{
+  "name": "bitty-buddies",
+  "productName": "Bitty Buddies",
+  "version": "1.0.0",
+  "description": "Blocky pixel pets that live on your desktop.",
+  "author": "WiggleCodes",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/make-icons.js",
+    "preview": "node scripts/preview.js",
+    "banner": "node scripts/make-banner.js",
+    "dist": "electron-builder",
+    "release": "electron-builder --publish always",
+    "keys": "node tools/licence-keys.js"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  },
+  "devDependencies": {
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0",
+    "pngjs": "^7.0.0"
+  },
+  "build": {
+    "appId": "com.wigglecodes.bittybuddies",
+    "productName": "Bitty Buddies",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "WiggleCodes",
+        "repo": "bitty-buddies",
+        "releaseType": "release"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "extendInfo": {
+        "LSUIElement": true
+      }
+    }
+  },
+  "bitty": {
+    "revokedUrl": "https://raw.githubusercontent.com/WiggleCodes/bitty-buddies/main/revoked.json"
+  }
+}

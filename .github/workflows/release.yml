@@ -1,0 +1,36 @@
+# Builds Windows + macOS installers and publishes them to a GitHub Release.
+# Trigger: push a tag like v1.0.1 (see README). Installed apps auto-update from these releases.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build and publish
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # No Apple certificate yet: build unsigned. Add CSC_LINK / CSC_KEY_PASSWORD /
+          # APPLE_ID secrets later and remove this line to sign + notarise.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
