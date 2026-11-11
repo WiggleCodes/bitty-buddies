@@ -28,7 +28,7 @@ const itemUnlocked = id => !!ITEMS[id] && packUnlocked(ITEMS[id].pack);
 const unlockedPackFiles = () => PACKS.filter(packUnlocked).map(p => p.file);
 
 // ---------- settings ----------
-const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false };
+const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false, mischief: true };
 let settings = { ...DEFAULTS };
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 
@@ -86,7 +86,8 @@ function createWindow() {
       packFiles: unlockedPackFiles(),
       things: settings.things.filter(t => itemUnlocked(t.id)),
       scale: settings.scale,
-      hidden: settings.hidden
+      hidden: settings.hidden,
+      mischief: settings.mischief
     });
     win.showInactive();
   });
@@ -163,6 +164,9 @@ ipcMain.on('thing-menu', (_e, { uid, id }) => {
     tpl.push({ label: 'Sit', click: () => send('thing-action', { uid, action: 'sit' }) });
     tpl.push({ label: 'Nap time', click: () => send('thing-action', { uid, action: 'sleep' }) });
     tpl.push({ label: 'Go for a walk', click: () => send('thing-action', { uid, action: 'walk' }) });
+    tpl.push({ label: 'Chase the mouse', click: () => send('thing-action', { uid, action: 'chase' }) });
+    tpl.push({ label: 'Climb the wall', click: () => send('thing-action', { uid, action: 'climb' }) });
+    tpl.push({ label: 'Start a battle!', click: () => send('thing-action', { uid, action: 'battle' }) });
     tpl.push({ type: 'separator' });
   }
   tpl.push({ label: `Remove ${item.name}`, click: () => send('thing-action', { uid, action: 'remove' }) });
@@ -194,6 +198,20 @@ function buildTrayMenu() {
     { type: 'separator' },
     { label: 'Spawn', submenu: spawnMenu('pet') },
     { label: 'Build', submenu: spawnMenu('build') },
+    {
+      label: 'Play', submenu: [
+        { label: 'Start a battle!', click: () => send('play', 'battle') },
+        { label: 'Throw a ball', click: () => send('play', 'ball') },
+        { label: 'Drop some treats', click: () => send('play', 'treats') },
+        { label: 'Dance party!', click: () => send('play', 'party') },
+        { label: 'Conga line!', click: () => send('play', 'conga') },
+        { type: 'separator' },
+        {
+          label: 'Mischief (chasing, climbing, scraps)', type: 'checkbox', checked: settings.mischief,
+          click: i => { settings.mischief = i.checked; saveSettings(); send('set-mischief', settings.mischief); }
+        }
+      ]
+    },
     {
       label: 'Clear', submenu: [
         { label: 'Remove all pets', click: () => send('clear', 'pet') },

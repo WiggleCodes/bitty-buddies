@@ -18,9 +18,10 @@ Everything lives in the **tray / menu-bar icon** (the little dog):
 
 - **Spawn** → pick a category (Critters, Fantasy Folk) → pick a pet
 - **Build** → Shrine, Campfire, Lantern Post
+- **Play** → Start a battle, Throw a ball, Drop some treats, Dance party, Conga line, plus a **Mischief** toggle for the things pets do on their own (chasing your cursor, climbing the screen edges, little scraps)
 - **Clear**, **Hide everything**, **Size**, **Start with computer**, **Check for updates…**
 
-On the desktop: **click** a pet to make it jump, **drag** to pick it up and throw it, **right-click** for Sit / Nap / Walk / Remove. Builds can be dragged along the ground. Everything you place is remembered between launches. Clicks pass straight through to your desktop everywhere except on the pets themselves.
+On the desktop: **click** a pet to make it jump, **drag** to pick it up and throw it, **hover** over one for a moment to give it a pat, and **right-click** for Sit, Nap, Walk, Chase the mouse, Climb the wall, Start a battle or Remove. Pets that catch your cursor ride along on it until you shake them off. You can also pick up and throw the ball. Builds can be dragged along the ground. Everything you place is remembered between launches. Clicks pass straight through to your desktop everywhere except on the pets themselves.
 
 ## Releasing + auto-update
 
