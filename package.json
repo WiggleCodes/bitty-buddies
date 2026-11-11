@@ -12,8 +12,7 @@
     "preview": "node scripts/preview.js",
     "banner": "node scripts/make-banner.js",
     "dist": "electron-builder",
-    "release": "electron-builder --publish always",
-    "keys": "node tools/licence-keys.js"
+    "release": "electron-builder --publish always"
   },
   "dependencies": {
     "electron-updater": "^6.8.11"
