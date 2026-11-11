@@ -65,6 +65,16 @@ h1 {
 .layer.dirt { background-color: var(--dirt); }
 .layer.deep-dirt { background-color: var(--dirt-deep); }
 .layer.stone-layer { background-color: var(--stone); }
+.layer.pricing-layer { background-color: #4C3524; }
+.price-card { background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 6px 6px 0 rgba(0, 0, 0, .35); padding: 22px 24px; max-width: 40rem; margin-top: 1.5rem; }
+.price-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.price-head h3 { margin: 0; }
+.price { font: 700 2.2rem var(--display); margin: 0; color: #B8860B; text-shadow: 2px 2px 0 rgba(46, 52, 92, .15); }
+.price-list { margin: 1rem 0 1.2rem; padding-left: 1.2rem; }
+.price-list li { margin: .3rem 0; }
+.inventory.compact { margin-top: .8rem; max-width: none; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; padding: 6px; }
+.btn.gold { background: #E7B93C; }
+.small-note { font-size: .9rem; margin: .8rem 0 0; color: #5B6285; }
 .bedrock { background-color: var(--bedrock); color: #C9CED6; padding: 36px 16px; font-size: .95rem; background-size: 192px 192px; }
 .wrap { max-width: 62rem; margin: 0 auto; }
 

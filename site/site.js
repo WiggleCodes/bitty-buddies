@@ -37,6 +37,7 @@
   const tex = {
     '.layer.dirt': texture('#7C573A', ['#6E4D33', '#8A6242', '#755237']),
     '.layer.deep-dirt': texture('#5E422C', ['#533A27', '#694A31', '#4C3524']),
+    '.layer.pricing-layer': texture('#4C3524', ['#433022', '#563C29', '#3E2C1F']),
     '.layer.stone-layer': texture('#6B7078', ['#62666E', '#757A82', '#5D6168'], ['#E7B93C', '#7FE8FF', '#C8392F']),
     '.bedrock': texture('#2F3238', ['#26292E', '#3A3D44', '#1F2125'])
   };
