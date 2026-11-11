@@ -3,12 +3,15 @@
 # Actions tab → Release → Run workflow:
 #   - if package.json's version has no release yet, it tags it and publishes a new release
 #   - if it already has one, it rebuilds that version in place and replaces its downloads
-# Pushing a v* tag yourself also publishes.
+# Pushing a v* tag yourself also publishes, and so does pushing a new "version" in
+# package.json to main (it's skipped if that version is already released).
 name: Release
 
 on:
   push:
     tags: ['v*']
+    branches: [main]
+    paths: ['package.json']
   workflow_dispatch:
 
 permissions:
@@ -20,6 +23,7 @@ jobs:
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
       inplace: ${{ steps.tag.outputs.inplace }}
+      skip: ${{ steps.tag.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
       - id: tag
@@ -27,8 +31,11 @@ jobs:
         run: |
           TAG="v$(node -p "require('./package.json').version")"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+          if [ "${{ github.ref_type }}" = "tag" ]; then
             echo "inplace=false" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "push" ] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "$TAG is already released; nothing to do"
           elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
             git tag -f "$TAG" && git push -f origin "refs/tags/$TAG"
             echo "inplace=true" >> "$GITHUB_OUTPUT"
@@ -40,6 +47,7 @@ jobs:
 
   build:
     needs: tag
+    if: needs.tag.outputs.skip != 'true'
     strategy:
       fail-fast: false
       matrix:
