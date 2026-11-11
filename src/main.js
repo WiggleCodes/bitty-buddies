@@ -126,7 +126,7 @@ let licenceWin = null;
 function licenceStatus() {
   const s = licence.status();
   const nameOf = id => (PACKS.find(p => p.id === id) || {}).name || id;
-  return { ...s, keys: s.keys.map(k => ({ ...k, packName: nameOf(k.pack) })), configured: licence.configured() };
+  return { ...s, keys: s.keys.map(k => ({ ...k, packNames: k.packs.map(nameOf) })), configured: licence.configured() };
 }
 
 function openLicenceWindow() {
@@ -151,9 +151,10 @@ function refreshUnlocks() {
 ipcMain.handle('licence:status', () => licenceStatus());
 ipcMain.handle('licence:activate', async (_e, key) => {
   try {
-    const pack = await licence.activate(key);
+    const packs = await licence.activate(key);
     refreshUnlocks();
-    return { ...licenceStatus(), unlocked: (PACKS.find(p => p.id === pack) || {}).name || pack };
+    const names = packs.map(id => (PACKS.find(p => p.id === id) || {}).name || id);
+    return { ...licenceStatus(), unlocked: names.join(' and ') };
   }
   catch (e) { return { error: e.message }; }
 });

@@ -1,4 +1,4 @@
-# Builds Windows + macOS installers and publishes them to a GitHub Release.
+# Builds the Windows installer and publishes them to a GitHub Release.
 #
 # Actions tab → Release → Run workflow:
 #   - if package.json's version has no release yet, it tags it and publishes a new release
@@ -44,7 +44,7 @@ jobs:
             echo "Rebuilding $TAG in place at $(git rev-parse --short HEAD)"
           else
             git tag "$TAG" && git push origin "$TAG"
-            # Create the release once here, so the Windows and Mac builds both add to it.
+            # Create the release once here; the Windows build adds its files to it.
             gh release create "$TAG" --title "$TAG" --notes "Bitty Buddies $TAG" --verify-tag
             echo "inplace=false" >> "$GITHUB_OUTPUT"
           fi
@@ -52,16 +52,9 @@ jobs:
   build:
     needs: tag
     if: needs.tag.outputs.skip != 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # No Apple certificate yet: build unsigned. Add CSC_LINK / CSC_KEY_PASSWORD /
-      # APPLE_ID secrets later and remove this line to sign + notarise.
-      CSC_IDENTITY_AUTO_DISCOVERY: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -84,6 +77,6 @@ jobs:
         run: |
           npx electron-builder --publish never
           shopt -s nullglob
-          files=(dist/*.exe dist/*.dmg dist/*.zip dist/*.blockmap dist/latest*.yml)
+          files=(dist/*.exe dist/*.blockmap dist/latest*.yml)
           ls -l "${files[@]}"
           gh release upload "${{ needs.tag.outputs.tag }}" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"

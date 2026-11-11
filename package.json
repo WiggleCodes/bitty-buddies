@@ -57,30 +57,6 @@
       "oneClick": true,
       "perMachine": false,
       "artifactName": "Bitty-Buddies-Setup-${version}.${ext}"
-    },
-    "mac": {
-      "category": "public.app-category.entertainment",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "universal"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "universal"
-          ]
-        }
-      ],
-      "extendInfo": {
-        "LSUIElement": true
-      },
-      "artifactName": "Bitty-Buddies-${version}-${arch}-mac.${ext}"
-    },
-    "dmg": {
-      "artifactName": "Bitty-Buddies-${version}-${arch}.${ext}"
     }
   },
   "bitty": {

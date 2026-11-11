@@ -11,14 +11,14 @@ function render(status) {
   for (const k of status.keys || []) {
     const li = document.createElement('li');
     const label = document.createElement('span');
-    label.textContent = `✔ ${k.packName}`;
+    label.textContent = `✔ ${k.packNames.join(', ')}`;
     const btn = document.createElement('button');
     btn.className = 'alt';
     btn.textContent = 'Remove';
     btn.onclick = async () => {
       btn.disabled = true;
       render(await window.licence.remove(k.id));
-      message(`${k.packName} key removed from this computer.`, true);
+      message('Key removed from this computer.', true);
     };
     li.append(label, btn);
     list.appendChild(li);

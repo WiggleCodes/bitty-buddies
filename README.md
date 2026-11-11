@@ -5,7 +5,7 @@
 > **© 2026 WiggleCodes. All rights reserved.**
 > This code is public for viewing only. It may not be copied, modified, claimed as your own, or re-uploaded anywhere without written permission. See [LICENSE](LICENSE).
 
-Blocky pixel pets that wander along the bottom of your screen, plus little builds they like to nap beside. For Windows and macOS, and it keeps itself up to date.
+Blocky pixel pets that wander along the bottom of your screen, plus little builds they like to nap beside. For Windows, and it keeps itself up to date.
 
 **[Download Bitty Buddies](https://github.com/WiggleCodes/bitty-buddies/releases/latest)** · **[Website](https://wigglecodes.github.io/bitty-buddies/)**
 
