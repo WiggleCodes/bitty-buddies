@@ -125,14 +125,14 @@ let licenceWin = null;
 
 function licenceStatus() {
   const s = licence.status();
-  const names = PACKS.filter(p => p.licensed && licence.isUnlocked(p.id)).map(p => p.name);
-  return { ...s, packNames: names, configured: licence.configured() };
+  const nameOf = id => (PACKS.find(p => p.id === id) || {}).name || id;
+  return { ...s, keys: s.keys.map(k => ({ ...k, packName: nameOf(k.pack) })), configured: licence.configured() };
 }
 
 function openLicenceWindow() {
   if (licenceWin) { licenceWin.show(); licenceWin.focus(); return; }
   licenceWin = new BrowserWindow({
-    width: 440, height: 340, resizable: false, minimizable: false, maximizable: false,
+    width: 440, height: 420, resizable: false, minimizable: false, maximizable: false,
     fullscreenable: false, title: 'Bitty Buddies licence', alwaysOnTop: true, show: false,
     autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'licence-window', 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
@@ -150,10 +150,14 @@ function refreshUnlocks() {
 
 ipcMain.handle('licence:status', () => licenceStatus());
 ipcMain.handle('licence:activate', async (_e, key) => {
-  try { await licence.activate(key); refreshUnlocks(); return licenceStatus(); }
+  try {
+    const pack = await licence.activate(key);
+    refreshUnlocks();
+    return { ...licenceStatus(), unlocked: (PACKS.find(p => p.id === pack) || {}).name || pack };
+  }
   catch (e) { return { error: e.message }; }
 });
-ipcMain.handle('licence:remove', async () => { await licence.remove(); refreshUnlocks(); return licenceStatus(); });
+ipcMain.handle('licence:remove', async (_e, id) => { await licence.remove(id); refreshUnlocks(); return licenceStatus(); });
 ipcMain.on('licence:close', () => { if (licenceWin) licenceWin.close(); });
 
 ipcMain.on('thing-menu', (_e, { uid, id }) => {
@@ -235,7 +239,7 @@ function buildTrayMenu() {
       click: i => app.setLoginItemSettings({ openAtLogin: i.checked })
     },
     { type: 'separator' },
-    { label: licence.status().active ? 'Licence key (active)…' : 'Enter licence key…', click: openLicenceWindow },
+    { label: licence.status().active ? 'Licence keys…' : 'Enter licence key…', click: openLicenceWindow },
     { label: 'Check for updates…', click: () => checkForUpdates(true) },
     { label: 'Quit', click: () => app.quit() }
   ]);

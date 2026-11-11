@@ -1,29 +1,45 @@
 const $ = id => document.getElementById(id);
 
-function show(status, message, good) {
-  $('inactive').classList.toggle('hidden', status.active);
-  $('active').classList.toggle('hidden', !status.active);
-  if (status.active) {
-    const packs = status.packs.includes('*') ? 'every pack' : status.packNames.join(', ');
-    $('summary').textContent = `Licence ${status.keyHint} is active. Unlocked: ${packs}.`;
-  }
-  $('msg').textContent = message || '';
+function message(text, good) {
+  $('msg').textContent = text || '';
   $('msg').className = 'msg ' + (good ? 'good' : 'err');
 }
 
-async function busy(btn, fn) {
-  btn.disabled = true;
-  try { await fn(); } finally { btn.disabled = false; }
+function render(status) {
+  const list = $('list');
+  list.textContent = '';
+  for (const k of status.keys || []) {
+    const li = document.createElement('li');
+    const label = document.createElement('span');
+    label.textContent = `✔ ${k.packName}`;
+    const btn = document.createElement('button');
+    btn.className = 'alt';
+    btn.textContent = 'Remove';
+    btn.onclick = async () => {
+      btn.disabled = true;
+      render(await window.licence.remove(k.id));
+      message(`${k.packName} key removed from this computer.`, true);
+    };
+    li.append(label, btn);
+    list.appendChild(li);
+  }
 }
 
-$('activate').onclick = () => busy($('activate'), async () => {
-  $('msg').textContent = 'Checking…'; $('msg').className = 'msg';
-  const r = await window.licence.activate($('key').value);
-  if (r.error) show({ active: false }, r.error);
-  else show(r, 'Unlocked! Your new pets are in the Spawn menu.', true);
-});
+$('activate').onclick = async () => {
+  $('activate').disabled = true;
+  message('Checking…', true);
+  try {
+    const r = await window.licence.activate($('key').value);
+    if (r.error) return message(r.error);
+    $('key').value = '';
+    render(r);
+    message(`Unlocked ${r.unlocked}! Find it in the Spawn and Build menus.`, true);
+  } finally { $('activate').disabled = false; }
+};
 $('key').onkeydown = e => { if (e.key === 'Enter') $('activate').click(); };
-$('remove').onclick = () => busy($('remove'), async () => show(await window.licence.remove(), 'Key removed from this computer.', true));
-$('close1').onclick = $('close2').onclick = () => window.licence.close();
+$('close').onclick = () => window.licence.close();
 
-window.licence.status().then(s => show(s, s.configured ? '' : 'Licensing isn’t set up in this build yet.'));
+window.licence.status().then(s => {
+  render(s);
+  if (!s.configured) message('Licence keys aren’t set up in this build yet.');
+});
