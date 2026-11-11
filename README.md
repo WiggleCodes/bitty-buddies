@@ -26,12 +26,7 @@ On the desktop: **click** a pet to make it jump, **drag** to pick it up and thro
 
 1. Create the GitHub repo and check `package.json → build.publish` points at it (it's set to `WiggleCodes/bitty-buddies`; change `owner` if you'd rather put it in your org).
 2. Push the code. The workflow in `.github/workflows/release.yml` needs no secrets for unsigned builds.
-3. To ship a version:
-   ```bash
-   npm version patch        # bumps 1.0.0 -> 1.0.1 and creates tag v1.0.1
-   git push --follow-tags
-   ```
-   GitHub Actions builds the Windows installer and the Mac `.dmg`/`.zip` and attaches them to a Release.
+3. To ship a version: bump `"version"` in `package.json` (e.g. 1.0.1), commit and push to `main`, then go to **Actions → Release → Run workflow**. It creates the `v1.0.1` tag, builds the Windows installer and the Mac `.dmg`/`.zip`, and attaches them to a Release. Pushing a `v1.0.1` tag yourself works too.
 4. Installed apps check for updates on launch and every 4 hours (or via the tray).
 
 **Windows** downloads updates in the background and asks to restart. Unsigned builds show a SmartScreen warning on first install ("More info → Run anyway").
