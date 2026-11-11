@@ -1,0 +1,33 @@
+# Posts the patch notes for every version (oldest first) to the Discord #updates channel.
+# Actions tab → "Discord update history" → Run workflow.
+name: Discord update history
+
+on:
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Post every version's notes
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret"; exit 1; fi
+          REPO_URL="https://github.com/$GITHUB_REPOSITORY/releases/latest"
+          jq -n '{username: "Bitty Buddies", avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
+                  content: "# 📜 Bitty Buddies: update history\nEverything that has changed so far! New versions will post here automatically. 🐾"}' > intro.json
+          curl -fsS -H "Content-Type: application/json" -d @intro.json "$WEBHOOK"
+          sleep 2
+          for f in $(ls release-notes/v*.md | sort -V); do
+            tag=$(basename "$f" .md)
+            title=$(head -n 1 "$f" | sed 's/^#* *//')
+            body=$(tail -n +2 "$f" | grep -v 'discord.gg' | head -c 3800)
+            jq -n --arg t "$title" --arg b "$body" --arg u "$REPO_URL" '{username: "Bitty Buddies",
+              avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
+              embeds: [{title: $t, description: $b, url: $u, color: 7126606}]}' > msg.json
+            curl -fsS -H "Content-Type: application/json" -d @msg.json "$WEBHOOK"
+            echo "posted $tag"
+            sleep 2
+          done
