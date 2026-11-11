@@ -97,6 +97,7 @@ jobs:
           URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
           jq -n --arg tag "$TAG" --arg url "$URL" '{
             username: "Bitty Buddies",
+            avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
             embeds: [{
               title: ("🆕 Bitty Buddies " + $tag + " is out!"),
               url: $url,
