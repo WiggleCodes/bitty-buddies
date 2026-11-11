@@ -28,6 +28,8 @@ jobs:
       - uses: actions/checkout@v4
       - id: tag
         name: Create or move the version tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v$(node -p "require('./package.json').version")"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
@@ -42,6 +44,8 @@ jobs:
             echo "Rebuilding $TAG in place at $(git rev-parse --short HEAD)"
           else
             git tag "$TAG" && git push origin "$TAG"
+            # Create the release once here, so the Windows and Mac builds both add to it.
+            gh release create "$TAG" --title "$TAG" --notes "Bitty Buddies $TAG" --verify-tag
             echo "inplace=false" >> "$GITHUB_OUTPUT"
           fi
 
