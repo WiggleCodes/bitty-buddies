@@ -808,6 +808,18 @@
     document.body.style.cursor = t || overBall ? 'grab' : 'default';
   });
 
+  // Cursor position from the main process, so pets can be grabbed even when the system
+  // doesn't forward mouse movement to the click-through overlay.
+  api.on('cursor', p => {
+    if (drag || !ignoring) return;            // the window already gets real mouse events
+    mouse.x = p.x; mouse.y = p.y; mouse.t = clock; mouse.seen = true;
+    if (hidden) return;
+    const t = thingAt(p.x, p.y);
+    const overBall = ballAt(p.x, p.y);
+    if (t !== hover.t) { hover.t = t; hover.since = clock; }
+    if (t || overBall) { setInteractive(true); document.body.style.cursor = 'grab'; }
+  });
+
   addEventListener('mousedown', e => {
     if (e.button !== 0) return;
     if (ballAt(e.clientX, e.clientY)) {

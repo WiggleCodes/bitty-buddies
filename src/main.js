@@ -93,6 +93,20 @@ function createWindow() {
   });
   win.on('closed', () => { win = null; });
 
+  // Windows doesn't always forward mouse movement to a click-through window, which meant
+  // the overlay never noticed the pointer over a pet and clicks went straight through.
+  // So we also tell the overlay where the cursor is, and it switches clicks on over a pet.
+  let lastCursor = '';
+  setInterval(() => {
+    if (!win || win.isDestroyed() || !win.isVisible()) return;
+    const p = screen.getCursorScreenPoint();
+    const b = win.getBounds();
+    const key = `${p.x},${p.y}`;
+    if (key === lastCursor) return;
+    lastCursor = key;
+    send('cursor', { x: p.x - b.x, y: p.y - b.y });
+  }, 33);
+
   screen.on('display-metrics-changed', fitToScreen);
   screen.on('display-added', fitToScreen);
   screen.on('display-removed', fitToScreen);
