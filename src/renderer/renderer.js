@@ -12,7 +12,7 @@
   const REG = {};            // "pack/item" -> definition
   let things = [];
   let scale = 4, hidden = false, ready = false, uidSeq = 1, mischief = true;
-  let ignoring = true, drag = null, clock = 0;
+  let ignoring = true, drag = null, clock = 0, windowGrab = false;
   const particles = [], battles = [], treats = [], frames = new Map();
   let ball = null, partyUntil = 0, conga = null;
   const mouse = { x: -9999, y: -9999, vx: 0, vy: 0, t: -99, seen: false, lastT: 0 };
@@ -76,8 +76,8 @@
   }
 
   // States where a pet is doing its own thing and shouldn't be pulled into games.
-  const LOCKED = ['held', 'ride', 'leap', 'climb', 'cling', 'battle', 'fall', 'dizzy', 'cheer', 'eat', 'carried', 'goGrab', 'haul'];
-  const MOVERS = ['walk', 'chase', 'fetch', 'snack', 'conga', 'toWall', 'goGrab', 'haul'];
+  const LOCKED = ['held', 'ride', 'leap', 'climb', 'cling', 'battle', 'fall', 'dizzy', 'cheer', 'eat', 'carried', 'goGrab', 'haul', 'goWin', 'winJump', 'tug'];
+  const MOVERS = ['walk', 'chase', 'fetch', 'snack', 'conga', 'toWall', 'goGrab', 'haul', 'goWin'];
 
   // ---------- things (pets + builds) ----------
   class Thing {
@@ -98,7 +98,7 @@
       this.bubble = null; this.target = null;
       this.side = 0; this.cy = 0; this.climbTo = 0;
       this.lunge = 0; this.knockT = 0; this.offX = 0;
-      this.carry = null; this.goal = 0; this.carrier = null;
+      this.carry = null; this.goal = 0; this.carrier = null; this.win = null;
     }
     wpx() { return this.def.w * scale; }
     hpx() { return this.def.h * scale; }
@@ -127,7 +127,7 @@
       if (this.state === 'sleep') pose = 'sleep';
       if (this.state === 'dizzy') blink = true;
       if (this.def.move === 'hop' && this.moving()) frame = Math.abs(Math.sin(this.hop * Math.PI)) < 0.25 ? 1 : 0;
-      if (['fall', 'held', 'ride', 'leap', 'cling'].includes(this.state)) frame = 0;
+      if (['fall', 'held', 'ride', 'leap', 'cling', 'winJump', 'tug'].includes(this.state)) frame = 0;
       if (this.lunge > 0) frame = 1;
       return { pose, frame, blink };
     }
@@ -162,6 +162,7 @@
         if (r < 0.08 && mouse.seen && clock - mouse.t < 5) { this.say('!'); return this.set('chase', rand(5, 9)); }
         if (r < 0.13) { this.dir = this.x < W() / 2 ? -1 : 1; return this.set('toWall', 15); }
         if (r < 0.19 && startGrab(this)) return;
+        if (r < 0.215 && windowGrab && !things.some(o => o.win)) { startWindowTug(this); if (this.win) return; }
       }
       if (r < 0.5) this.set('walk', rand(2, 7));
       else if (r < 0.72) { this.set('idle', rand(2, 5)); if (Math.random() < 0.25) this.say(pick(['?', '♪', '❤'])); }
@@ -197,7 +198,59 @@
         if (!c || !things.includes(c) || c.state !== 'haul' || !c.carry || c.carry.obj !== this) { this.carrier = null; this.vy = 0; this.vx = 0; this.state = 'fall'; }
         return;
       }
+      if (this.win && !this.win.pending && !['goWin', 'winJump', 'tug'].includes(S)) { api.releaseWindow(); this.win = null; }
       if (S === 'held' || S === 'battle' || S === 'conga') return;
+
+      if (S === 'goWin') {                     // run to just under the window's bottom edge
+        const w = this.win;
+        if (!w) return this.next();
+        this.timer -= dt;
+        const dx = w.gx - this.x;
+        if (Math.abs(dx) > 2 * scale) { this.dir = Math.sign(dx); this.x += this.dir * this.runSpeed() * dt; }
+        else {
+          this.vy = -Math.sqrt(2 * GRAVITY * (ground - w.hangY)) * 1.12;
+          this.state = 'winJump';
+          dust(this.x + this.wpx() / 2, ground, 4);
+        }
+        if (this.timer <= 0) { this.win = null; api.releaseWindow(); this.next(); }
+        return;
+      }
+      if (S === 'winJump') {
+        const w = this.win;
+        this.vy += GRAVITY * dt;
+        this.y += this.vy * dt;
+        if (w && (this.y <= w.hangY || (this.vy >= 0 && this.y <= w.hangY + 4 * scale))) { // caught the edge!
+          this.y = w.hangY; this.vy = 0;
+          this.state = 'tug'; this.timer = rand(1.6, 3.2);
+          const roomR = W() - (w.rect.x + w.rect.width), roomL = w.rect.x;
+          w.dir = roomR > roomL ? 1 : -1;
+          w.room = Math.max(0, Math.min(w.dir > 0 ? roomR : roomL, 420));
+          this.dir = w.dir;
+          this.say('!', 1);
+        } else if (this.y >= ground) { this.y = ground; this.vy = 0; this.win = null; api.releaseWindow(); this.say('?', 1.2); this.next(); }
+        return;
+      }
+      if (S === 'tug') {                       // hanging off the window, dragging it along
+        const w = this.win;
+        if (!w) { this.state = 'fall'; return; }
+        this.timer -= dt;
+        const step = Math.min(160 * (scale / 4) * dt, w.room - Math.abs(w.offset));
+        if (step > 0) {
+          w.offset += w.dir * step;
+          this.x += w.dir * step;
+          if (!w.busy) {
+            w.busy = true;
+            api.moveWindow(w.offset).then(ok => { w.busy = false; if (!ok && this.win === w) { this.win = null; this.state = 'fall'; this.say('!', 1); } });
+          }
+        }
+        this.y = w.hangY + Math.sin(clock * 12) * scale * 0.6;   // little wiggle while pulling
+        if (this.timer <= 0 || step <= 0) {
+          api.moveWindow(w.offset).finally(() => api.releaseWindow());
+          this.win = null; this.y = w.hangY; this.vy = 0; this.vx = w.dir * 120;
+          this.state = 'fall'; this.say(pick(['♪', '❤']), 1.4);
+        }
+        return;
+      }
 
       if (S === 'ride') {                      // dangling from the mouse pointer
         this.x = mouse.x - this.wpx() / 2;
@@ -336,6 +389,8 @@
   }
 
   // ---------- games ----------
+  const shuffle = arr => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+
   function pets(filterFree = true) {
     return things.filter(t => !t.isBuild && (!filterFree || !LOCKED.includes(t.state)));
   }
@@ -491,6 +546,21 @@
     if (ball && !ball.held && !ball.carrier && !things.some(o => o.carry && o.carry.obj === ball)) list.push({ kind: 'ball', obj: ball });
     return list;
   }
+  // Grab the window the user is working in and give it a tug (Windows, Mischief only).
+  async function startWindowTug(p) {
+    if (!windowGrab || !p || p.isBuild || LOCKED.includes(p.state) || p.y < H() - 1) return false;
+    p.win = { pending: true };                 // reserve so we only try one window at a time
+    const rect = await api.grabWindow().catch(() => null);
+    if (!rect || !things.includes(p) || LOCKED.includes(p.state)) { p.win = null; if (rect) api.releaseWindow(); return false; }
+    const hangY = rect.y + rect.height + p.def.feet * scale;  // pet's head just under the bottom edge
+    if (H() - hangY > 440 || hangY > H() - 4 * scale) { p.win = null; api.releaseWindow(); p.say('?', 1.2); return false; }
+    const lo = Math.max(0, rect.x + 10), hi = Math.min(W() - p.wpx(), rect.x + rect.width - p.wpx() - 10);
+    p.win = { rect, hangY, gx: clamp(rand(lo, Math.max(lo, hi)), 0, Math.max(0, W() - p.wpx())), offset: 0, dir: 1, room: 0, busy: false };
+    p.set('goWin', 12);
+    p.say('!', 1);
+    return true;
+  }
+
   function startGrab(p) {
     if (!p || p.isBuild || LOCKED.includes(p.state) || p.y < H() - 1) return false;
     const options = grabTargets(p);
@@ -878,6 +948,7 @@
   api.on('init', async d => {
     scale = d.scale || 4;
     mischief = d.mischief !== false;
+    windowGrab = !!d.windowGrab;
     await loadPacks(d.packFiles || []);
     resize();
     setHidden(d.hidden);
@@ -911,7 +982,19 @@
     else if (action === 'treats') dropTreats(3);
     else if (action === 'party') party();
     else if (action === 'conga') startConga();
-    else if (action === 'tidy') pets().forEach(p => startGrab(p));
+    else if (action === 'tidy') {
+      // One pet at a time picks a target, and a pet that's about to be carried doesn't
+      // also run off to grab something (that used to cancel everyone out).
+      let started = 0;
+      for (const p of shuffle(pets())) {
+        if (things.some(o => o.carry && o.carry.obj === p)) continue;
+        if (startGrab(p)) started++;
+      }
+      if (!started) { throwBall(); setTimeout(() => { const p = pick(pets()); if (p) startGrab(p); }, 1200); }
+    } else if (action === 'window') {
+      const p = pets().filter(q => !LOCKED.includes(q.state)).sort((a, b) => Math.random() - 0.5)[0];
+      if (p) startWindowTug(p).then(ok => { if (!ok && !p.bubble) p.say('?', 1.2); });
+    }
   });
   api.on('thing-action', ({ uid, action }) => {
     const t = things.find(x => x.uid === uid);

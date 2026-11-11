@@ -1,7 +1,7 @@
 {
   "name": "bitty-buddies",
   "productName": "Bitty Buddies",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Blocky pixel pets that live on your desktop.",
   "author": "WiggleCodes",
   "license": "SEE LICENSE IN LICENSE",
@@ -15,7 +15,8 @@
     "release": "electron-builder --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.8.11"
+    "electron-updater": "^6.8.11",
+    "koffi": "^2.16.3"
   },
   "devDependencies": {
     "electron": "^45.3.0",
@@ -28,7 +29,11 @@
     "files": [
       "src/**/*",
       "assets/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/koffi/build/koffi/{darwin,freebsd,linux,musl,openbsd}_*/**",
+      "!node_modules/koffi/build/koffi/win32_ia32/**",
+      "!node_modules/koffi/src/**",
+      "!node_modules/koffi/doc/**"
     ],
     "directories": {
       "buildResources": "build",
@@ -57,7 +62,10 @@
       "oneClick": true,
       "perMachine": false,
       "artifactName": "Bitty-Buddies-Setup-${version}.${ext}"
-    }
+    },
+    "asarUnpack": [
+      "node_modules/koffi/**"
+    ]
   },
   "bitty": {
     "revokedUrl": "https://raw.githubusercontent.com/WiggleCodes/bitty-buddies/main/revoked.json",

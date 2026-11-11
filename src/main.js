@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const pkg = require('../package.json');
 const licence = require('./licence');
+const windows = require('./windows');
 
 const IS_MAC = process.platform === 'darwin';
 const MAX_THINGS = 40;
@@ -87,7 +88,8 @@ function createWindow() {
       things: settings.things.filter(t => itemUnlocked(t.id)),
       scale: settings.scale,
       hidden: settings.hidden,
-      mischief: settings.mischief
+      mischief: settings.mischief,
+      windowGrab: windows.supported()
     });
     win.showInactive();
   });
@@ -122,6 +124,11 @@ ipcMain.on('set-ignore', (_e, ignore) => {
   if (ignore) win.setIgnoreMouseEvents(true, { forward: true });
   else win.setIgnoreMouseEvents(false);
 });
+
+// Mischief: pets can grab the window you're using and tug it along a bit.
+ipcMain.handle('grab-window', () => (win && settings.mischief ? windows.pickWindow(win.getBounds(), [process.pid]) : null));
+ipcMain.handle('move-window', (_e, dx) => windows.moveWindow(Number(dx) || 0));
+ipcMain.on('release-window', () => windows.release());
 
 ipcMain.on('things-changed', (_e, things) => {
   if (!Array.isArray(things)) return;
@@ -226,9 +233,10 @@ function buildTrayMenu() {
         { label: 'Dance party!', click: () => send('play', 'party') },
         { label: 'Conga line!', click: () => send('play', 'conga') },
         { label: 'Move things around!', click: () => send('play', 'tidy') },
+        ...(windows.supported() ? [{ label: 'Grab a window!', click: () => send('play', 'window') }] : []),
         { type: 'separator' },
         {
-          label: 'Mischief (chasing, climbing, scraps)', type: 'checkbox', checked: settings.mischief,
+          label: 'Mischief (chasing, climbing, window tugging)', type: 'checkbox', checked: settings.mischief,
           click: i => { settings.mischief = i.checked; saveSettings(); send('set-mischief', settings.mischief); }
         }
       ]
