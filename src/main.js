@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain, screen, nativeImage, dialog, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, screen, nativeImage, dialog, shell, powerMonitor } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const pkg = require('../package.json');
@@ -257,7 +257,9 @@ function buildTrayMenu() {
     },
     { type: 'separator' },
     { label: licence.status().active ? 'Licence keys…' : 'Enter licence key…', click: openLicenceWindow },
-    { label: 'Check for updates…', click: () => checkForUpdates(true) },
+    readyVersion
+      ? { label: `🎉 Restart to update to v${readyVersion}`, click: () => setImmediate(() => autoUpdater.quitAndInstall()) }
+      : { label: 'Check for updates…', click: () => checkForUpdates(true) },
     { label: 'Quit', click: () => app.quit() }
   ]);
   tray.setContextMenu(menu);
@@ -278,6 +280,8 @@ const pub = (pkg.build && pkg.build.publish && pkg.build.publish[0]) || {};
 const RELEASES_URL = `https://github.com/${pub.owner}/${pub.repo}/releases/latest`;
 let manualCheck = false;
 let autoUpdater = null;
+let readyVersion = null;   // an update that has downloaded and is waiting for a restart
+let lastAutoCheck = 0;
 
 function setupUpdates() {
   if (!app.isPackaged) return;
@@ -302,6 +306,9 @@ function setupUpdates() {
     manualCheck = false;
   });
   autoUpdater.on('update-downloaded', async info => {
+    if (readyVersion === info.version) return; // already told them about this one
+    readyVersion = info.version;
+    buildTrayMenu();
     const r = await dialog.showMessageBox({
       type: 'info', buttons: ['Restart now', 'Later'], defaultId: 0,
       message: `Bitty Buddies ${info.version} is ready`,
@@ -314,8 +321,17 @@ function setupUpdates() {
     manualCheck = false;
   });
 
-  checkForUpdates(false);
-  setInterval(() => checkForUpdates(false), 4 * 60 * 60 * 1000);
+  // Check at launch, every 30 minutes while the app is open, and when the PC wakes up
+  // or is unlocked (sleeping laptops can miss the timer for hours).
+  const autoCheck = () => {
+    if (readyVersion || Date.now() - lastAutoCheck < 5 * 60 * 1000) return;
+    lastAutoCheck = Date.now();
+    checkForUpdates(false);
+  };
+  autoCheck();
+  setInterval(autoCheck, 30 * 60 * 1000);
+  powerMonitor.on('resume', () => setTimeout(autoCheck, 15000));
+  powerMonitor.on('unlock-screen', () => setTimeout(autoCheck, 15000));
 }
 
 function checkForUpdates(manual) {
