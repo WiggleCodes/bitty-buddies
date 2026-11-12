@@ -84,18 +84,27 @@ window.TeaserAudio = (() => {
     cheer() { [62, 66, 69, 74].forEach((m, i) => setTimeout(() => on && synth({ freq: mtof(m), type: 'square', len: 0.09, vol: 0.08, r: 0.1, cutoff: 2600, echo: 0.6 }), i * 90)); },
     squelch() { synth({ freq: 180, sweepTo: 60, type: 'sine', len: 0.25, vol: 0.3, r: 0.2, cutoff: 600, q: 0 }); synth({ freq: 240, sweepTo: 120, type: 'triangle', len: 0.15, vol: 0.15, r: 0.15 }); },
     boom() { synth({ freq: 60, sweepTo: 28, type: 'sine', len: 0.6, vol: 0.9, r: 2.2, cutoff: 300, q: 0, rev: 0.6 }); noise({ len: 0.3, vol: 0.3, type: 'lowpass', freq: 2000, freqTo: 200, r: 1.8, rev: 0.9 }); },
-    swell() { noise({ len: 1.4, vol: 0.18, type: 'highpass', freq: 400, freqTo: 6000, a: 1.3, r: 0.05, rev: 0.4 }); }
+    swell() { noise({ len: 1.4, vol: 0.18, type: 'highpass', freq: 400, freqTo: 6000, a: 1.3, r: 0.05, rev: 0.4 }); },
+    skid() { noise({ len: 0.35, vol: 0.16, type: 'bandpass', freq: 2400, freqTo: 900, q: 2, r: 0.15 }); },
+    whoosh() { noise({ len: 1.5, vol: 0.3, type: 'bandpass', freq: 300, freqTo: 5000, q: 1.2, a: 1.2, r: 0.2, rev: 0.6 }); synth({ freq: 50, sweepTo: 200, type: 'sawtooth', len: 1.5, vol: 0.12, a: 1, r: 0.3, cutoff: 600, q: 8, rev: 0.5 }); },
+    hollow() { [38, 45, 50].forEach((m, i) => synth({ freq: mtof(m), type: 'sine', len: 2.4, vol: 0.12, a: 0.5, s: 0.9, r: 1.2, detune: (i - 1) * 14, cutoff: 900, q: 0, rev: 0.9 })); noise({ len: 2.4, vol: 0.05, type: 'bandpass', freq: 700, q: 6, a: 0.8, r: 1, rev: 0.9 }); },
+    eye() { synth({ freq: 1760, sweepTo: 1700, type: 'sine', len: 1, vol: 0.09, a: 0.02, r: 0.5, cutoff: 6000, q: 0, rev: 0.8 }); synth({ freq: 46, type: 'sawtooth', len: 1, vol: 0.3, a: 0.05, r: 0.6, cutoff: 400, q: 6, rev: 0.6 }); noise({ len: 0.8, vol: 0.2, type: 'highpass', freq: 800, freqTo: 6000, a: 0.7, r: 0.05 }); },
+    jump() { synth({ freq: 300, sweepTo: 900, type: 'square', len: 0.25, vol: 0.08, r: 0.1, cutoff: 2400, echo: 0.4 }); noise({ len: 0.2, vol: 0.12, type: 'bandpass', freq: 1500, q: 2, r: 0.1 }); },
+    shock() { synth({ freq: 70, sweepTo: 25, type: 'sine', len: 0.5, vol: 0.85, r: 1.4, cutoff: 300, q: 0, rev: 0.7 }); noise({ len: 0.6, vol: 0.3, type: 'bandpass', freq: 3000, freqTo: 200, q: 1, r: 1.2, rev: 0.8 }); },
+    glitch() { for (let i = 0; i < 5; i++) setTimeout(() => on && noise({ len: 0.03, vol: 0.16, type: 'bandpass', freq: 800 + i * 900, q: 4, r: 0.02 }), i * 45); synth({ freq: 220, sweepTo: 110, type: 'square', len: 0.12, vol: 0.06, r: 0.05, cutoff: 1800 }); }
   };
-  const CUES = [[0.05, 'tape'], [8.1, 'buzz'], [8.7, 'buzz'], [9.4, 'buzz'], [10.15, 'thunder'], [10.5, 'rift'], [12.4, 'rise'],
-    [14.55, 'roar'], [15.5, 'yelp'], [17.75, 'thud'], [17.8, 'yelp'], [18.1, 'twang'], [18.4, 'hit'], [18.65, 'twang'], [18.95, 'hit'], [19.2, 'twang'],
-    [19.5, 'hit'], [19.55, 'thunder'], [20.9, 'flee'], [21.6, 'cheer'], [23.3, 'squelch'], [23.2, 'swell'], [24.6, 'boom']];
+  const CUES = [[0.05, 'tape'], [4.15, 'skid'], [6.6, 'buzz'], [7.2, 'buzz'], [7.9, 'buzz'], [8.45, 'thunder'], [8.8, 'rift'],
+    [10.05, 'whoosh'], [11.6, 'hollow'], [13.05, 'eye'], [14.1, 'boom'], [14.25, 'roar'], [15.3, 'yelp'], [18.2, 'thud'], [18.25, 'yelp'],
+    [18.6, 'twang'], [18.9, 'hit'], [19.25, 'twang'], [19.55, 'jump'], [19.7, 'hit'], [20.1, 'twang'], [20.35, 'hit'], [20.4, 'thunder'],
+    [21.0, 'flee'], [21.85, 'shock'], [22.35, 'cheer'], [23.4, 'rift'], [23.6, 'swell'], [24.1, 'squelch'], [26.0, 'boom'], [26.05, 'glitch'], [27.4, 'glitch']];
 
   // ---- the score, section by section ----
   function step(i, t) {
     const bar = Math.floor(i / 16), s = i % 16, ch = CHORDS[bar % 4], notes = ext(ch);
-    const sect = t < 3 ? 'intro' : t < 8 ? 'town' : t < 10.3 ? 'flicker' : t < 12.4 ? 'rift' : t < 16.2 ? 'stalk' : t < 21 ? 'fight' : t < 24.6 ? 'after' : 'title';
+    const sect = t < 2.6 ? 'intro' : t < 6.5 ? 'town' : t < 8.8 ? 'flicker' : t < 11.6 ? 'rift' : t < 14.2 ? 'hollow' : t < 17.9 ? 'stalk' : t < 21.3 ? 'fight' : t < 26 ? 'after' : 'title';
     if (s === 0 && ['intro', 'town', 'stalk', 'after', 'title'].includes(sect)) pad(ch, STEP * 16, sect === 'title' ? 0.08 : sect === 'intro' || sect === 'town' ? 0.075 : 0.05, sect === 'title' ? 1600 : 800);
-    if (s === 0 && ['rift', 'stalk'].includes(sect)) drone();
+    if (s === 0 && ['rift', 'hollow', 'stalk'].includes(sect)) drone();
+    if (sect === 'hollow' && (s === 0 || s === 3 || s === 8 || s === 11)) kick(0.7);          // a racing heartbeat on the other side
     const arpOn = { town: 900, flicker: 1100, fight: 2600, after: 700, title: 3000 }[sect];
     if (arpOn && !(sect === 'flicker' && Math.random() < 0.45) && !(sect === 'after' && s % 2)) arp(notes[ARP[s]] + 12, arpOn);
     if (['stalk', 'fight'].includes(sect) && s % 2 === 0) bass(ch[0] + (s % 8 === 6 ? 12 : 0));
@@ -105,7 +114,7 @@ window.TeaserAudio = (() => {
   }
 
   function update(t) {
-    if (!on || !ac) { lastT = t; return; }
+    if (!on || !ac || !(t >= 0)) { lastT = Math.max(0, t || 0); return; }
     if (t < lastT) { fired.clear(); lastStep = -1; }                 // the trailer looped
     for (const [at, name] of CUES) if (t >= at && !fired.has(at)) { fired.add(at); if (t - at < 0.5) SFX[name](); }
     const cur = Math.floor(t / STEP);
