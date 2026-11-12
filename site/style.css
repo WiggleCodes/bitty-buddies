@@ -137,3 +137,25 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .price-card.dark { background: #241A3E; color: #EDE8FF; }
 .price-card.winter { background: #EAF3FC; }
 .price-card.winter .trailer { background: #2A4A78; }
+
+/* homepage pack tiles */
+.pack-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 1.4rem 0 1.6rem; }
+.pack-tile { display: grid; gap: 2px; text-decoration: none; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 5px 5px 0 rgba(0,0,0,.35); padding: 14px 16px; transition: transform .12s; }
+.pack-tile:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 rgba(0,0,0,.35); }
+.pack-tile strong { font: 700 1.3rem var(--display); }
+.pack-tile span:last-child { font-weight: 700; color: #6A5A3A; }
+.pack-tile.night { background: #241A3E; color: #EDE8FF; }
+.pack-tile.night span:last-child { color: #B07CFF; }
+.pack-tile.snow { background: #EAF3FC; }
+.tile-sprites { display: flex; gap: 4px; align-items: flex-end; min-height: 52px; margin-bottom: 6px; }
+.tile-sprites canvas { width: 40px; height: auto; image-rendering: pixelated; }
+
+/* packs page */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; background: linear-gradient(var(--sky-top), var(--sky-low)); border-bottom: 6px solid var(--grass); }
+.brand { font: 700 1.6rem var(--display); color: #fff; text-decoration: none; text-shadow: 3px 3px 0 var(--ink); }
+.topbar nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.topbar nav a { font: 700 1rem var(--display); color: var(--ink); text-decoration: none; background: var(--paper); border: 3px solid var(--ink); padding: 4px 12px; }
+.topbar nav a[aria-current="page"] { background: var(--glow); }
+.page-title { font: 700 clamp(2.4rem, 7vw, 4rem)/1 var(--display); color: #fff; text-shadow: 4px 4px 0 var(--ink); margin: 0 0 .6rem; }
+@media (prefers-reduced-motion: reduce) { .pack-tile { transition: none; } }
+.packs-page .lede + h2 { margin-top: 2.2rem; }

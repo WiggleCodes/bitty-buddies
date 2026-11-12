@@ -45,7 +45,7 @@
 
   // ---------- clouds ----------
   const cloudBox = document.querySelector('.clouds');
-  for (let k = 0; k < 6; k++) {
+  for (let k = 0; cloudBox && k < 6; k++) {
     const w = Math.floor(rand(5, 10));
     const c = document.createElement('canvas'); c.width = w + 2; c.height = 3;
     const x = c.getContext('2d'); x.fillStyle = '#fff';
@@ -62,7 +62,7 @@
   }
 
   // ---------- inventory ----------
-  const detail = document.getElementById('detail');
+  const detail = document.getElementById('detail') || { set textContent(v) {} };
   document.querySelectorAll('.inventory').forEach(box => {
     const pack = PACKS[box.dataset.pack];
     if (!pack) return;
@@ -82,8 +82,17 @@
     }
   });
 
+  // ---------- homepage pack tiles: a row of each pack's buddies ----------
+  document.querySelectorAll('[data-tile]').forEach(box => {
+    const pack = PACKS[box.dataset.tile];
+    if (!pack) return;
+    Object.values(pack.items).map(i => PX.withDefaults(i)).filter(d => d.kind !== 'build').slice(0, 5)
+      .forEach(def => box.appendChild(gridToCanvas(PX.drawItem(def, { pose: 'idle', frame: 0, blink: false }))));
+  });
+
   // ---------- the meadow ----------
   const canvas = document.getElementById('meadow');
+  if (!canvas) return;                       // the packs page has no meadow
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0, S = 4, GROUND = 0;
   const things = [], particles = [];
