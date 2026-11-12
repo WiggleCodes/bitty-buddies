@@ -183,3 +183,4 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .trailer.big .trailer-toggle { top: 8px; bottom: auto; }
 .trailer-sound { position: absolute; left: 8px; top: 8px; font: 700 .85rem var(--display); color: #120B22; background: #6FF0D8; border: 2px solid #EDE8FF; padding: 2px 10px; cursor: pointer; }
 .trailer-sound[aria-pressed="true"] { background: #EDE8FF; }
+.teaser-video { display: block; width: 100%; max-width: 960px; aspect-ratio: 16 / 9; margin: 1.2rem 0 1rem; border: 3px solid #6FF0D8; background: #05030C; box-shadow: 0 0 0 3px #120B22, 0 0 40px rgba(176,124,255,.45); }
