@@ -93,14 +93,32 @@
     const embers = Array.from({ length: 30 }, (_, i) => ({ x: rand(0, SW), s: rand(0, 1), v: rand(0.05, 0.12), c: i % 3 ? '#FF8A3C' : '#FFC46A' }));
 
     // sound: off until the viewer asks for it (browsers block autoplaying audio anyway)
-    let lastTeaserT = 0, soundWanted = false;
+    // Sound is on by default. Browsers only allow audio after the visitor clicks, taps or
+    // presses a key on the page, so it starts then (or straight away if the browser allows it).
+    let lastTeaserT = 0, soundWanted = true;
     const soundBtn = nightBox.parentElement.querySelector('.trailer-sound');
     const pauseBtn = nightBox.parentElement.querySelector('.trailer-toggle');
-    const label = () => { soundBtn.textContent = soundWanted ? '🔇 Sound off' : '🔊 Sound on'; soundBtn.setAttribute('aria-pressed', String(soundWanted)); };
+    const playing = () => !pauseBtn || pauseBtn.getAttribute('aria-pressed') !== 'false';
+    const label = () => {
+      const blocked = soundWanted && !TeaserAudio.running;
+      soundBtn.textContent = !soundWanted ? '🔊 Sound on' : blocked ? '🔊 Tap for sound' : '🔇 Mute';
+      soundBtn.setAttribute('aria-pressed', String(soundWanted));
+    };
     if (soundBtn && window.TeaserAudio) {
-      soundBtn.hidden = false; label();
-      soundBtn.addEventListener('click', () => { soundWanted = !soundWanted; TeaserAudio.setOn(soundWanted && pauseBtn.getAttribute('aria-pressed') !== 'false', lastTeaserT); label(); });
-      pauseBtn && pauseBtn.addEventListener('click', () => { if (soundWanted) TeaserAudio.setOn(pauseBtn.getAttribute('aria-pressed') !== 'false', lastTeaserT); });
+      soundBtn.hidden = false;
+      TeaserAudio.setOn(playing(), lastTeaserT, () => label());
+      const unlock = e => {
+        if (e.target === soundBtn) return;                           // the button handles itself
+        if (soundWanted && playing()) TeaserAudio.setOn(true, lastTeaserT, () => label());
+        if (TeaserAudio.running) ['pointerdown', 'keydown'].forEach(t => removeEventListener(t, unlock, true));
+      };
+      ['pointerdown', 'keydown'].forEach(t => addEventListener(t, unlock, true));
+      soundBtn.addEventListener('click', () => {
+        soundWanted = TeaserAudio.running ? !soundWanted : true;      // a first tap on the button turns sound on
+        TeaserAudio.setOn(soundWanted && playing(), lastTeaserT, () => label()); label();
+      });
+      pauseBtn && pauseBtn.addEventListener('click', () => { if (soundWanted) TeaserAudio.setOn(playing(), lastTeaserT, () => label()); });
+      label();
     }
 
     trailer(nightBox, 28, (a, t) => {

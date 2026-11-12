@@ -113,12 +113,16 @@ window.TeaserAudio = (() => {
     for (let i = lastStep + 1; i <= cur && i - lastStep < 4; i++) step(i, t);
     lastStep = cur; lastT = t;
   }
-  function setOn(v, t = 0) {
+  function setOn(v, t = 0, changed) {
     on = v;
-    if (on) { if (!ac) init(); ac.resume(); fired.clear(); for (const [at] of CUES) if (at < t - 0.3) fired.add(at); lastStep = -1; }
-    else if (ac) ac.suspend();
+    if (on) {
+      if (!ac) init();
+      fired.clear(); for (const [at] of CUES) if (at < t - 0.3) fired.add(at); lastStep = -1;
+      ac.resume().then(() => changed && changed(), () => changed && changed());
+      if (changed) ac.onstatechange = () => changed();
+    } else if (ac) ac.suspend().then(() => changed && changed());
   }
   // For recording the trailer with its soundtrack.
   function stream() { if (!ac) init(); const d = ac.createMediaStreamDestination(); comp.connect(d); return d.stream; }
-  return { update, setOn, stream, get on() { return on; } };
+  return { update, setOn, stream, get on() { return on; }, get running() { return !!ac && on && ac.state === 'running'; } };
 })();
