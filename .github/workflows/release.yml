@@ -73,6 +73,13 @@ jobs:
         if: needs.tag.outputs.inplace != 'true'
         run: npx electron-builder --publish always
 
+      # A copy with a fixed name, so the website can link straight to the newest installer.
+      - name: Add a stable-named installer
+        shell: bash
+        run: |
+          cp dist/Bitty-Buddies-Setup-*.exe dist/Bitty-Buddies-Setup.exe
+          gh release upload "${{ needs.tag.outputs.tag }}" dist/Bitty-Buddies-Setup.exe --clobber --repo "$GITHUB_REPOSITORY"
+
       - name: Build and replace the existing release's downloads
         if: needs.tag.outputs.inplace == 'true'
         shell: bash
@@ -99,7 +106,7 @@ jobs:
           TAG: ${{ needs.tag.outputs.tag }}
         run: |
           if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret; skipping"; exit 0; fi
-          URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG"
+          URL="https://wigglecodes.github.io/bitty-buddies/"
           NOTES="Your app will update itself next time it checks. New here? Grab it from the link above."
           if [ -f "release-notes/$TAG.md" ]; then NOTES="$(tail -n +2 "release-notes/$TAG.md" | head -c 3800)"; fi
           jq -n --arg tag "$TAG" --arg url "$URL" --arg notes "$NOTES" '{

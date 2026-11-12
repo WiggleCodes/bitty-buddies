@@ -290,7 +290,7 @@ function createTray() {
 
 // ---------- auto-update (GitHub Releases) ----------
 const pub = (pkg.build && pkg.build.publish && pkg.build.publish[0]) || {};
-const RELEASES_URL = `https://github.com/${pub.owner}/${pub.repo}/releases/latest`;
+const RELEASES_URL = 'https://wigglecodes.github.io/bitty-buddies/';   // the website's download button, not the GitHub page
 let manualCheck = false;
 let autoUpdater = null;
 let readyVersion = null;   // an update that has downloaded and is waiting for a restart
