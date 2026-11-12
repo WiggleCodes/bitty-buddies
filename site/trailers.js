@@ -92,8 +92,21 @@
       vine(0, 30, 1, 0, 26), vine(SW - 1, 50, -1, 0, 30), vine(60, 0, 0, 1, 22), vine(190, 0, 0, 1, 28)];
     const embers = Array.from({ length: 30 }, (_, i) => ({ x: rand(0, SW), s: rand(0, 1), v: rand(0.05, 0.12), c: i % 3 ? '#FF8A3C' : '#FFC46A' }));
 
+    // sound: off until the viewer asks for it (browsers block autoplaying audio anyway)
+    let lastTeaserT = 0, soundWanted = false;
+    const soundBtn = nightBox.parentElement.querySelector('.trailer-sound');
+    const pauseBtn = nightBox.parentElement.querySelector('.trailer-toggle');
+    const label = () => { soundBtn.textContent = soundWanted ? '🔇 Sound off' : '🔊 Sound on'; soundBtn.setAttribute('aria-pressed', String(soundWanted)); };
+    if (soundBtn && window.TeaserAudio) {
+      soundBtn.hidden = false; label();
+      soundBtn.addEventListener('click', () => { soundWanted = !soundWanted; TeaserAudio.setOn(soundWanted && pauseBtn.getAttribute('aria-pressed') !== 'false', lastTeaserT); label(); });
+      pauseBtn && pauseBtn.addEventListener('click', () => { if (soundWanted) TeaserAudio.setOn(pauseBtn.getAttribute('aria-pressed') !== 'false', lastTeaserT); });
+    }
+
     trailer(nightBox, 28, (a, t) => {
       const { ctx, frame } = a;
+      lastTeaserT = t;
+      if (window.TeaserAudio) TeaserAudio.update(t);
       const seg = (x, y) => span(t, x, y);
       const fadeIn = (x, y) => clamp(seg(x, y), 0, 1);
       const scenePart = t >= 3 && t < 24.6;
