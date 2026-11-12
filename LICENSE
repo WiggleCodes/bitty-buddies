@@ -3,15 +3,17 @@ Copyright (c) 2026 WiggleCodes (Reece). All rights reserved.
 
 This software, including its source code, artwork, sprites and documentation
 (together, "the Software"), is the property of WiggleCodes. The source code is
-published publicly for viewing only. No licence to use, copy or distribute it
-is granted except as set out below.
+published publicly for viewing only. No licence to use it is granted, including
+for personal, private, educational or non-commercial use.
 
 YOU MAY:
-  - View and read the source code.
-  - Download and use official releases of Bitty Buddies, published by
-    WiggleCodes, for personal, non-commercial use.
+  - View and read the source code on GitHub.
 
 YOU MAY NOT, without prior written permission from WiggleCodes:
+  - Use, run, build, compile or install the source code, or any part of it,
+    for any purpose, including personal or non-commercial use.
+  - Download, clone or keep copies of the source code, except the temporary
+    copy your browser makes to display it.
   - Copy, reproduce or reuse the Software, in whole or in part.
   - Modify, adapt, translate or create derivative works based on the Software.
   - Claim the Software, or any part of it, as your own work, or remove or alter
@@ -19,6 +21,10 @@ YOU MAY NOT, without prior written permission from WiggleCodes:
   - Re-upload, mirror, redistribute, publish, sublicense or sell the Software or
     any modified version of it, on any website, store or platform.
   - Use the Software, its artwork or its name in another product or project.
+
+Official releases of the Bitty Buddies app, downloaded from the official
+Bitty Buddies website, are not covered by the restrictions on using the source
+code above, and may be installed and used by end users as published.
 
 Forking this repository on GitHub, where GitHub's Terms of Service allow it,
 does not grant any of the rights listed above.

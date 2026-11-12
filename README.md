@@ -3,7 +3,7 @@
 # Bitty Buddies
 
 > **© 2026 WiggleCodes. All rights reserved.**
-> This code is public for viewing only. It may not be copied, modified, claimed as your own, or re-uploaded anywhere without written permission. See [LICENSE](LICENSE).
+> This code is public for viewing only. It may not be used, built, run, copied, modified, claimed as your own, or re-uploaded anywhere, including for personal use, without written permission. See [LICENSE](LICENSE).
 
 Blocky pixel pets that wander along the bottom of your screen, plus little builds they like to nap beside. For Windows, and it keeps itself up to date.
 
@@ -32,4 +32,4 @@ Fantasy Folk and its builds unlock with a licence key from WiggleCodes.
 
 ## Licence
 
-© 2026 WiggleCodes. All rights reserved. You may view the code and use official releases for personal use. You may not copy, modify, claim as your own, or re-upload this code or its artwork anywhere. Full terms in [LICENSE](LICENSE).
+© 2026 WiggleCodes. All rights reserved. The source code is for viewing only: you may not use, build, run, copy, modify, claim as your own, or re-upload it or its artwork, including for personal use. To use Bitty Buddies, download the official app from the website. Full terms in [LICENSE](LICENSE).
