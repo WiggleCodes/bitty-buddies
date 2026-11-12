@@ -128,3 +128,4 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
   .cloud { animation: none; }
   .slot:hover canvas, .slot.on canvas { animation: none; }
 }
+[hidden] { display: none !important; }

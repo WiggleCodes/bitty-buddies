@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths: ['site/**', 'src/packs/**', 'src/shared/**', '.github/banner.png', 'build/icon.png', '.github/workflows/pages.yml']
   workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'   # refresh the saved Discord member count
 
 permissions:
   contents: read
@@ -35,6 +37,8 @@ jobs:
           rm _site/js/packs/index.js
           cp .github/banner.png _site/banner.png
           cp build/icon.png _site/icon.png
+          curl -fsS 'https://discord.com/api/v10/invites/aCHyjABJG7?with_counts=true' \
+            | jq '{approximate_member_count, approximate_presence_count}' > _site/discord.json || echo '{}' > _site/discord.json
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

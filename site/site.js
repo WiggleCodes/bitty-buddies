@@ -284,3 +284,15 @@
   }
   requestAnimationFrame(loop);
 })();
+
+// Discord member count: live from Discord's invite info, or the copy saved when the site was last built.
+(async () => {
+  const live = () => fetch('https://discord.com/api/v10/invites/aCHyjABJG7?with_counts=true').then(r => r.ok ? r.json() : Promise.reject());
+  const saved = () => fetch('discord.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject());
+  let data;
+  try { data = await live(); } catch { try { data = await saved(); } catch { return; } }
+  const members = data.approximate_member_count;
+  if (!members) return;
+  const fmt = n => Number(n).toLocaleString('en-GB');
+  for (const el of document.querySelectorAll('.discord-count')) { el.textContent = ` · ${fmt(members)} members`; el.hidden = false; }
+})();
