@@ -159,3 +159,25 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .page-title { font: 700 clamp(2.4rem, 7vw, 4rem)/1 var(--display); color: #fff; text-shadow: 4px 4px 0 var(--ink); margin: 0 0 .6rem; }
 @media (prefers-reduced-motion: reduce) { .pack-tile { transition: none; } }
 .packs-page .lede + h2 { margin-top: 2.2rem; }
+
+/* secret teaser section */
+.night-layer { position: relative; color: #EDE8FF;
+  background-image: var(--vines-l, none), var(--vines-r, none),
+    radial-gradient(ellipse at 50% 100%, rgba(176,124,255,.35), transparent 60%),
+    radial-gradient(ellipse at 80% 0%, rgba(111,240,216,.12), transparent 50%),
+    linear-gradient(#0B0716, #1E1236 70%, #120B22) !important;
+  background-repeat: repeat-y, repeat-y, no-repeat, no-repeat, no-repeat;
+  background-position: left top, right top, center, center, center;
+  background-size: 72px auto, 72px auto, auto, auto, auto; }
+.night-layer .kicker { display: inline-block; margin: 0 0 .4rem; font: 700 .95rem var(--display); color: #120B22; background: #6FF0D8; border: 3px solid #EDE8FF; padding: 2px 10px; }
+.night-title { font: 700 clamp(2.4rem, 8vw, 4.4rem)/1 var(--display) !important; color: #6FF0D8; text-shadow: 0 0 18px rgba(111,240,216,.6), 4px 4px 0 #3A2458; margin: .2rem 0 .6rem; }
+.night-layer .lede { color: #CFC6F0; }
+.trailer.big { max-width: 960px; margin: 1.4rem 0; border-color: #6FF0D8; box-shadow: 0 0 0 3px #120B22, 0 0 40px rgba(176,124,255,.45); background: #05030C; }
+.trailer.big canvas { aspect-ratio: 256 / 144; }
+.night-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 22px; align-items: start; max-width: 960px; }
+.night-details .price-list { margin-top: .8rem; }
+@media (max-width: 760px) { .night-details { grid-template-columns: 1fr; } .night-layer { background-size: 36px auto, 36px auto, auto, auto, auto; } }
+.tile-sprites.mystery i { font: 700 1.6rem var(--display); font-style: normal; color: #6FF0D8; text-shadow: 0 0 10px rgba(111,240,216,.7); width: 34px; text-align: center; border: 2px dashed #6A4EA8; }
+.teaser-note { color: #CFC6F0; margin: 0; }
+.teaser-note a { color: #6FF0D8; font-weight: 700; }
+.trailer.big .trailer-toggle { top: 8px; bottom: auto; }
