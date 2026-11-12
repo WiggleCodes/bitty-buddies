@@ -4,6 +4,7 @@ const fs = require('fs');
 const pkg = require('../package.json');
 const licence = require('./licence');
 const windows = require('./windows');
+const stats = require('./stats');
 
 const IS_MAC = process.platform === 'darwin';
 const MAX_THINGS = 40;
@@ -29,7 +30,7 @@ const itemUnlocked = id => !!ITEMS[id] && packUnlocked(ITEMS[id].pack);
 const unlockedPackFiles = () => PACKS.filter(packUnlocked).map(p => p.file);
 
 // ---------- settings ----------
-const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false, mischief: true };
+const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false, mischief: true, shareStats: true, stats: {} };
 let settings = { ...DEFAULTS };
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 
@@ -263,6 +264,10 @@ function buildTrayMenu() {
       label: 'Start with computer', type: 'checkbox', checked: app.getLoginItemSettings().openAtLogin,
       click: i => app.setLoginItemSettings({ openAtLogin: i.checked })
     },
+    {
+      label: 'Count me in the user stats (anonymous)', type: 'checkbox', checked: settings.shareStats,
+      click: i => { settings.shareStats = i.checked; saveSettings(); if (i.checked) statsCheckIn(); }
+    },
     { type: 'separator' },
     { label: licence.status().active ? 'Licence keys…' : 'Enter licence key…', click: openLicenceWindow },
     readyVersion
@@ -351,6 +356,15 @@ function checkForUpdates(manual) {
   autoUpdater.checkForUpdates().catch(() => {});
 }
 
+// ---------- anonymous user count ----------
+function statsCheckIn() {
+  if (!app.isPackaged || !settings.shareStats) return;
+  if (!settings.stats || typeof settings.stats !== 'object') settings.stats = {};
+  stats.checkIn(settings.stats, { version: app.getVersion(), licensed: licence.status().active })
+    .then(changed => { if (changed) saveSettings(); })
+    .catch(() => {});
+}
+
 // ---------- lifecycle ----------
 app.whenReady().then(() => {
   if (IS_MAC && app.dock) app.dock.hide();
@@ -364,6 +378,11 @@ app.whenReady().then(() => {
   const recheck = () => licence.revalidate().then(result => { if (result === 'changed') refreshUnlocks(); });
   recheck();
   setInterval(recheck, 30 * 60 * 1000);
+
+  // Count this PC once per day/week/month it's used (checked hourly so long sessions roll over).
+  setTimeout(statsCheckIn, 20000);
+  setInterval(statsCheckIn, 60 * 60 * 1000);
+  powerMonitor.on('resume', () => setTimeout(statsCheckIn, 20000));
 });
 
 app.on('second-instance', () => {
