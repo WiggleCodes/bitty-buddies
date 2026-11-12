@@ -35,6 +35,8 @@ jobs:
           cp src/shared/pixel.js _site/js/
           cp src/packs/*.js _site/js/packs/
           rm _site/js/packs/index.js
+          # bust browser caches: every deploy gets fresh script and style URLs
+          V=$(date +%s); sed -i -E "s#\?v=[0-9]+#?v=$V#g" _site/*.html
           cp .github/banner.png _site/banner.png
           cp build/icon.png _site/icon.png
           curl -fsS 'https://discord.com/api/v10/invites/aCHyjABJG7?with_counts=true' \
