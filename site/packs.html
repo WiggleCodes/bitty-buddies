@@ -19,79 +19,79 @@
   <script src="chrome.js?v=202611122256"></script>
 
   <main>
-    <section class="layer dirt">
+    <section class="layer dirt packs-top">
       <div class="wrap">
         <h1 class="page-title">The packs</h1>
-        <p class="lede">Everything you can bring to your desktop. The Critters and Builds come free with every download. The rest unlock with a one-off licence key, and one key holds every pack you own.</p>
-        <h2>Free with every download</h2>
-        <h3>Critters</h3>
-        <div class="inventory" data-pack="critters"></div>
-        <h3>Builds</h3>
-        <div class="inventory builds" data-pack="builds"></div>
-        <p class="detail" id="detail" aria-live="polite">Hover or tap a slot to see who's who.</p>
-      </div>
-    </section>
+        <p class="lede">Everything you can bring to your desktop. The Critters and Builds come free with every download. Extra packs unlock with a one-off licence key, and one key holds every pack you own.</p>
+        <p class="detail-card" id="detail" aria-live="polite">Hover or tap a slot to see who's who.</p>
 
-    <section class="layer pricing-layer">
-      <div class="wrap">
-        <h2>Extra packs</h2>
-        <div class="price-card" id="fantasy">
-          <div class="price-head">
-            <h3>Fantasy Folk</h3>
-            <p class="price">Coming soon</p>
-          </div>
-          <div class="inventory compact" data-pack="fantasy"></div>
-          <ul class="price-list">
-            <li><strong>4 adventurers:</strong> Wizard, Knight, Dwarf and Ranger</li>
-            <li><strong>4 builds:</strong> Burrow Cottage, Wizard's Tower, Dwarf Forge and Treehouse</li>
-            <li><strong>Yours to keep:</strong> pay once, no subscription</li>
-            <li><strong>One key for all:</strong> future packs get added to the same key</li>
-            <li><strong>Loyalty Member</strong> role and the private Loyalty Lounge on our Discord</li>
-          </ul>
-          <a class="btn discord big" href="https://discord.gg/aCHyjABJG7">Get notified on Discord<span class="discord-count" hidden></span></a>
-          <p class="small-note">Fantasy Folk is almost ready. Join the Discord and you'll hear the moment it goes on sale.</p>
-        </div>
-      </div>
-    </section>
+        <div class="pack-grid">
+          <article class="pack-card" id="critters">
+            <div class="pack-card-head"><h2>Critters</h2><span class="price-tag free">Free</span></div>
+            <p class="pack-sub">The original crew of pets.</p>
+            <div class="inventory compact" data-pack="critters"></div>
+            <ul class="price-list">
+              <li><strong>Pets with personality:</strong> each one walks, naps and plays its own way</li>
+              <li><strong>Included</strong> with every download</li>
+            </ul>
+          </article>
 
-    <section class="layer night-layer" id="secret">
-      <div class="wrap">
-        <p class="kicker">Top secret</p>
-        <h2 class="night-title">Something's coming...</h2>
-        <p class="lede">We can't say much yet. Watch closely.</p>
-        <figure class="trailer big">
-          <canvas data-trailer="teaser" aria-label="A mysterious teaser trailer for a secret upcoming pack."></canvas>
-          <button class="trailer-toggle" type="button">Pause</button>
-          <button class="trailer-sound" type="button" hidden>🔊 Sound on</button>
-        </figure>
-        <p class="teaser-note">Join the <a href="https://discord.gg/aCHyjABJG7">Discord</a> to be first to find out.</p>
-      </div>
-    </section>
+          <article class="pack-card" id="builds">
+            <div class="pack-card-head"><h2>Builds</h2><span class="price-tag free">Free</span></div>
+            <p class="pack-sub">Little places for your buddies to gather.</p>
+            <div class="inventory compact builds" data-pack="builds"></div>
+            <ul class="price-list">
+              <li><strong>Make a camp:</strong> pets curl up beside builds and warm up by the fire</li>
+              <li><strong>Included</strong> with every download</li>
+            </ul>
+          </article>
 
-    <section class="layer pricing-layer">
-      <div class="wrap">
-        <div class="price-card winter" id="winter">
-          <div class="price-head">
-            <h3>Jolly Winter</h3>
-            <p class="price">Free from 1 December</p>
-          </div>
-          <figure class="trailer">
-            <canvas data-trailer="winter" aria-label="Trailer for Jolly Winter, out 1 December: snow falls and piles up while an elf, a reindeer, a snowman and friends play by a twinkling tree."></canvas>
-            <button class="trailer-toggle" type="button">Pause</button>
-          </figure>
-          <div class="inventory compact" data-pack="winter"></div>
-          <ul class="price-list">
-            <li><strong>5 festive buddies:</strong> Jingle the elf, Tinsel the reindeer, Flake the snowman, Nook the polar bear and Snap the gingerbread pup</li>
-            <li><strong>2 builds:</strong> a Twinkle Tree and a Gingerbread House</li>
-            <li><strong>Let it snow:</strong> snow falls across your desktop and slowly piles up along the bottom and on your builds</li>
-            <li><strong>Free</strong> for everyone, arriving 1 December for the run-up to Christmas</li>
-          </ul>
+          <article class="pack-card" id="fantasy">
+            <div class="pack-card-head"><h2>Fantasy Folk</h2><span class="price-tag">Coming soon</span></div>
+            <p class="pack-sub">Adventurers and their homes.</p>
+            <div class="inventory compact" data-pack="fantasy"></div>
+            <ul class="price-list">
+              <li><strong>4 adventurers:</strong> Wizard, Knight, Dwarf and Ranger</li>
+              <li><strong>4 builds:</strong> Burrow Cottage, Wizard's Tower, Dwarf Forge and Treehouse</li>
+              <li><strong>Yours to keep:</strong> pay once, no subscription</li>
+              <li><strong>Loyalty Member</strong> role and the private Loyalty Lounge on our Discord</li>
+            </ul>
+            <a class="btn discord pack-cta" href="https://discord.gg/aCHyjABJG7">Get notified on Discord<span class="discord-count" hidden></span></a>
+          </article>
+
+          <article class="pack-card winter" id="winter">
+            <div class="pack-card-head"><h2>Jolly Winter</h2><span class="price-tag gift">Free from 1 Dec</span></div>
+            <p class="pack-sub">Festive friends and falling snow.</p>
+            <figure class="trailer">
+              <canvas data-trailer="winter" aria-label="Trailer for Jolly Winter, out 1 December: snow falls and piles up while an elf, a reindeer, a snowman and friends play by a twinkling tree."></canvas>
+              <button class="trailer-toggle" type="button">Pause</button>
+            </figure>
+            <div class="inventory compact" data-pack="winter"></div>
+            <ul class="price-list">
+              <li><strong>5 festive buddies:</strong> Jingle the elf, Tinsel the reindeer, Flake the snowman, Nook the polar bear and Snap the gingerbread pup</li>
+              <li><strong>2 builds:</strong> a Twinkle Tree and a Gingerbread House</li>
+              <li><strong>Let it snow:</strong> snow falls across your desktop and slowly piles up</li>
+            </ul>
+          </article>
+
+          <article class="pack-card secret night-layer" id="secret">
+            <div class="pack-card-head"><h2 class="night-title">Something's coming...</h2><span class="price-tag secret-tag">Top secret</span></div>
+            <p class="pack-sub">We can't say much yet. Watch closely.</p>
+            <figure class="trailer big">
+              <canvas data-trailer="teaser" aria-label="A mysterious teaser trailer for a secret upcoming pack."></canvas>
+              <button class="trailer-toggle" type="button">Pause</button>
+              <button class="trailer-sound" type="button" hidden>🔊 Sound on</button>
+            </figure>
+            <p class="teaser-note">Join the <a href="https://discord.gg/aCHyjABJG7">Discord</a> to be first to find out.</p>
+          </article>
+
+          <article class="pack-card soon">
+            <div class="pack-card-head"><h2>More on the way</h2></div>
+            <p>New packs are in the works. When one lands, you'll get an upgraded key that unlocks it alongside everything you already have.</p>
+            <p><a href="https://discord.gg/aCHyjABJG7">Join the Discord</a> to hear first and catch free key drops.</p>
+            <a class="btn grass pack-cta" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest/download/Bitty-Buddies-Setup.exe" data-download>Get Bitty Buddies, free</a>
+          </article>
         </div>
-        <div class="price-card soon">
-          <h3>More packs on the way</h3>
-          <p>New paid packs are in the works. When one lands, you'll get an upgraded key that unlocks it alongside everything you already have. <a href="https://discord.gg/aCHyjABJG7">Join the Discord</a> to hear first and catch free key drops.</p>
-        </div>
-        <a class="btn grass big" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest/download/Bitty-Buddies-Setup.exe" data-download>Get Bitty Buddies, free</a>
       </div>
     </section>
   </main>

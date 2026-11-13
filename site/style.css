@@ -398,3 +398,33 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .swatch[aria-checked="true"] { outline: 3px solid var(--glow); outline-offset: 2px; }
 .picker-actions { display: flex; gap: 10px; margin-top: 8px; }
 @media (max-width: 560px) { .picker-body { grid-template-columns: 1fr; } }
+
+/* packs page: every pack as a card, side by side */
+.packs-top .detail-card { max-width: 40rem; min-height: auto; margin: 1.2rem 0 0; }
+.pack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 18px; margin-top: 1.6rem; align-items: stretch; }
+.pack-card { display: flex; flex-direction: column; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 6px 6px 0 rgba(0,0,0,.35); padding: 18px 20px; scroll-margin-top: 90px; }
+.pack-card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pack-card-head h2 { margin: 0; font-size: 1.7rem; color: inherit; text-shadow: none; }
+.pack-sub { margin: .3rem 0 .4rem; color: #5A6075; font-weight: 700; }
+.price-tag { font: 700 1rem var(--display); color: var(--ink); background: var(--glow); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 3px 10px; white-space: nowrap; }
+.price-tag.free { background: #BFE8A8; }
+.price-tag.gift { background: #CFE6FA; }
+.pack-card .inventory.compact { margin-top: .6rem; }
+.pack-card .price-list { margin: .9rem 0 0; }
+.pack-card .pack-cta { margin-top: auto; align-self: flex-start; }
+.pack-card .price-list + .pack-cta, .pack-card p + .pack-cta { margin-top: 1.2rem; }
+.pack-card.winter { background: #EAF3FC; }
+.pack-card.soon { background: #DCE3EA; }
+.pack-card.soon p { margin: .6rem 0 0; }
+.pack-card.soon a:not(.btn) { font-weight: 700; }
+.pack-card.secret { grid-column: span 2; color: #EDE8FF; border-color: #6FF0D8; box-shadow: 0 0 0 3px #120B22, 0 0 30px rgba(176,124,255,.4); }
+.pack-card.secret .pack-sub { color: #CFC6F0; }
+.pack-card.secret .night-title { font-size: clamp(1.6rem, 3vw, 2.2rem) !important; margin: 0; }
+.secret-tag { background: #6FF0D8; color: #120B22; border-color: #EDE8FF; box-shadow: none; }
+.pack-card.secret .trailer.big { margin: .8rem 0; max-width: none; }
+.pack-card.secret .teaser-note { margin-top: auto; }
+@media (max-width: 760px) { .pack-card.secret { grid-column: auto; } }
+.pack-card.soon { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: center; }
+.pack-card.soon .pack-card-head, .pack-card.soon p { grid-column: 1; }
+.pack-card.soon .pack-cta { grid-column: 2; grid-row: 1 / span 3; margin: 0; align-self: center; }
+@media (max-width: 640px) { .pack-card.soon { display: flex; } .pack-card.soon .pack-cta { margin-top: 1.2rem; align-self: flex-start; } }
