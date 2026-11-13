@@ -36,7 +36,6 @@
         <a class="status-pill checking" href="status.html" title="Live service status">
           <span class="lamp" aria-hidden="true"></span><span class="status-pill-text">Checking…</span>
         </a>
-        <a class="btn grass small head-download" href="${DOWNLOAD}" data-download>Download</a>
         <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu-panel">Menu</button>
       </div>
       <nav class="menu-panel" id="menu-panel" aria-label="Main" hidden>
