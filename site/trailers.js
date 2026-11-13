@@ -383,6 +383,136 @@
     nightLayer.style.setProperty('--vines-r', `url(${strip(true)})`);
   }
 
+  // Soft round light behind a build (campfire, lantern, shrine crystal).
+  function glow(a, x, y, r, rgb, k = 1) {
+    const g = a.ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${rgb},${0.45 * k})`); g.addColorStop(1, `rgba(${rgb},0)`);
+    a.ctx.fillStyle = g; a.ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  const has = (pack, key) => PACKS[pack] && PACKS[pack].items[key];
+
+  // ---------- Critters: a sunny day in the meadow ----------
+  const crittersBox = document.querySelector('[data-trailer="critters"]');
+  if (crittersBox && PACKS.critters) {
+    trailer(crittersBox, 12, (a, t) => {
+      const { ctx, W, H, frame, state } = a, G = 80;
+      if (!state.clouds) {
+        state.clouds = Array.from({ length: 4 }, (_, i) => ({ x: i * 70 + rand(0, 30), y: rand(6, 26), w: rand(16, 30), v: rand(3, 6) }));
+        state.flowers = Array.from({ length: 22 }, () => ({ x: rand(0, W), y: G + rand(2, 8), c: ['#FFFFFF', '#FFD84A', '#FF7FB0', '#B07CFF'][Math.floor(rand(0, 4))] }));
+        state.flies = Array.from({ length: 3 }, (_, i) => ({ p: i * 2.1, y: rand(30, 60), c: ['#FFD84A', '#7FD8FF', '#FF9AD0'][i] }));
+        state.hearts = [];
+      }
+      const sky = ctx.createLinearGradient(0, 0, 0, G); sky.addColorStop(0, '#6FB8EC'); sky.addColorStop(1, '#BFE6FA');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, G);
+      a.rect(208, 10, 12, 12, '#FFE97A'); a.rect(206, 12, 16, 8, '#FFE97A'); a.rect(210, 8, 8, 16, '#FFE97A');   // sun
+      for (const c of state.clouds) {
+        const x = ((c.x + t * c.v) % (W + 40)) - 30;
+        a.rect(x, c.y, c.w, 4, '#FFFFFF'); a.rect(x + 4, c.y - 3, c.w - 10, 3, '#FFFFFF'); a.rect(x + 2, c.y + 4, c.w - 4, 2, '#EAF6FF');
+      }
+      for (let x = 0; x < W; x += 16) a.rect(x, G - 10 - (x * 7) % 6, 16, 10 + (x * 7) % 6, '#8FCB6A');                  // far hills
+      a.rect(0, G, W, H - G, '#6CBE4E'); a.rect(0, G, W, 2, '#54A03C'); a.rect(0, G + 6, W, H - G - 6, '#5DAE45');
+      for (const f of state.flowers) { a.rect(f.x, f.y, 2, 2, f.c); a.rect(f.x, f.y + 2, 1, 2, '#3E8A3A'); }
+      // a ball bouncing across, with the pup chasing it
+      const bx = ((t * 34) % (W + 60)) - 30, by = G - 3 - Math.abs(Math.sin(t * 5)) * 16;
+      a.put('critters', 'pup', bx - 22, G, { pose: 'walk', frame });
+      a.rect(bx - 2, by - 2, 5, 5, '#E8394A'); a.rect(bx - 1, by - 1, 2, 2, '#FFB0B0');
+      a.put('critters', 'kit', 40 + Math.sin(t * 0.6) * 18, G, { pose: t % 6 < 4 ? 'walk' : 'sit', frame, flip: Math.cos(t * 0.6) < 0 });
+      if (has('critters', 'bun')) a.put('critters', 'bun', 150 + Math.sin(t * 0.9) * 30, G - Math.abs(Math.sin(t * 6)) * 6, { pose: 'walk', frame, flip: Math.cos(t * 0.9) < 0 });
+      if (has('critters', 'mossling')) a.put('critters', 'mossling', 104, G - Math.abs(Math.sin(t * 4 + 1)) * 4, { pose: 'idle', frame });
+      if (has('critters', 'ember')) a.put('critters', 'ember', 200, G - Math.abs(Math.sin(t * 5 + 2)) * 5, { pose: 'idle', frame });
+      if (has('critters', 'pip')) a.put('critters', 'pip', lerp(230, 175, span(t, 2, 10)), G, { pose: t > 2 && t < 10 ? 'walk' : 'idle', frame, flip: true });
+      // butterflies
+      for (const b of state.flies) { const x = ((t * 18 + b.p * 60) % (W + 20)) - 10, y = b.y + Math.sin(t * 3 + b.p) * 6, wing = Math.floor(t * 8 + b.p) % 2; a.rect(x, y, 1, 2, '#3A2A1A'); a.rect(x - 2, y - wing, 2, 2, b.c); a.rect(x + 1, y - wing, 2, 2, b.c); }
+      // the odd heart pops up when someone gets a pat
+      if (Math.floor(t * 2) !== state.lastBeat) { state.lastBeat = Math.floor(t * 2); if (Math.random() < 0.35) state.hearts.push({ x: rand(30, 210), y: G - 18, life: 0 }); }
+      state.hearts = state.hearts.filter(h => (h.life += 1 / 60) < 1.2);
+      for (const h of state.hearts) { const y = h.y - h.life * 14; a.rect(h.x, y, 2, 1, '#FF5A8A'); a.rect(h.x + 3, y, 2, 1, '#FF5A8A'); a.rect(h.x - 1, y + 1, 7, 2, '#FF5A8A'); a.rect(h.x, y + 3, 5, 1, '#FF5A8A'); a.rect(h.x + 1, y + 4, 3, 1, '#FF5A8A'); a.rect(h.x + 2, y + 5, 1, 1, '#FF5A8A'); }
+    });
+  }
+
+  // ---------- Builds: the camp from sunset to starlight ----------
+  const buildsBox = document.querySelector('[data-trailer="builds"]');
+  if (buildsBox && PACKS.builds) {
+    trailer(buildsBox, 14, (a, t) => {
+      const { ctx, W, H, frame, state } = a, G = 80;
+      const night = clamp(span(t, 2, 8), 0, 1) * (1 - clamp(span(t, 12.5, 14), 0, 1));
+      if (!state.stars) {
+        state.stars = Array.from({ length: 50 }, () => [rand(0, W), rand(0, 55), rand(0, 6)]);
+        state.flies = Array.from({ length: 12 }, () => ({ x: rand(0, W), y: rand(40, 76), p: rand(0, 6) }));
+        state.sparks = [];
+      }
+      const mix = (c1, c2, k) => { const p = s => [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16)); const A = p(c1), B = p(c2); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})`; };
+      const sky = ctx.createLinearGradient(0, 0, 0, G);
+      sky.addColorStop(0, mix('#F2A06A', '#120C2A', night)); sky.addColorStop(1, mix('#FFD9A0', '#2C1E4A', night));
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, G);
+      const sunY = 30 + night * 50; a.rect(36, sunY, 14, 10, '#FFE7A0'); a.rect(34, sunY + 2, 18, 6, '#FFE7A0');
+      for (const [x, y, k] of state.stars) a.rect(x, y, 1, 1, `rgba(255,255,255,${night * (0.4 + 0.5 * Math.abs(Math.sin(t * 1.4 + k)))})`);
+      if (night > 0.5) { const mc = `rgba(232,226,208,${(night - 0.5) * 2})`; a.rect(170, 12, 10, 10, mc); a.rect(168, 14, 14, 6, mc); a.rect(172, 10, 6, 14, mc); }
+      for (let x = 0; x < W; x += 12) a.rect(x, G - 14 - (x * 5) % 9, 12, 14 + (x * 5) % 9, mix('#7A8A4A', '#14182A', night));  // tree line
+      a.rect(0, G, W, H - G, mix('#6CBE4E', '#1E3A24', night)); a.rect(0, G, W, 2, mix('#54A03C', '#16301C', night));
+      // the builds, glowing brighter as it gets dark
+      glow(a, 120, G - 9, 30, '255,150,60', 0.4 + night * (0.9 + Math.sin(t * 9) * 0.1));
+      glow(a, 46, G - 14, 26, '170,120,255', 0.3 + night * 0.8);
+      glow(a, 196, G - 14, 22, '255,215,110', 0.3 + night * 0.8);
+      a.put('builds', 'shrine', 46, G, { frame });
+      a.put('builds', 'campfire', 120, G, { frame });
+      a.put('builds', 'lantern', 196, G, { frame });
+      // sparks rising from the fire
+      if (Math.random() < 0.3) state.sparks.push({ x: 120 + rand(-3, 3), y: G - 12, v: rand(10, 20), life: 0 });
+      state.sparks = state.sparks.filter(s => (s.life += 1 / 60) < 1.4);
+      for (const s of state.sparks) a.rect(s.x + Math.sin(s.life * 6) * 2, s.y - s.life * s.v, 1, 1, s.life < 0.7 ? '#FFD84A' : '#FF8A3C');
+      // pets wander in and curl up by the fire as night falls
+      const settle = (from, to, t0, t1) => lerp(from, to, span(t, t0, t1));
+      const walking = (t0, t1) => t > t0 && t < t1;
+      a.put('critters', 'pup', settle(-20, 98, 1, 6), G, walking(1, 6) ? { pose: 'walk', frame } : t >= 6 ? { pose: night > 0.8 ? 'sleep' : 'sit', frame } : { pose: 'idle', frame });
+      a.put('critters', 'kit', settle(260, 142, 2, 7), G, walking(2, 7) ? { pose: 'walk', frame, flip: true } : t >= 7 ? { pose: night > 0.8 ? 'sleep' : 'sit', frame, flip: true } : { pose: 'idle', frame, flip: true });
+      if (has('critters', 'pip')) a.put('critters', 'pip', settle(-30, 70, 4, 9), G, walking(4, 9) ? { pose: 'walk', frame } : t >= 9 ? { pose: 'sit', frame } : { pose: 'idle', frame });
+      // fireflies come out at night
+      for (const f of state.flies) { const on = Math.sin(t * 2 + f.p) > 0.2; if (on && night > 0.4) a.rect(f.x + Math.sin(t + f.p) * 8, f.y + Math.cos(t * 1.3 + f.p) * 4, 1, 1, `rgba(220,255,140,${night})`); }
+    });
+  }
+
+  // ---------- Fantasy Folk: twilight in the wizard's village ----------
+  const fantasyBox = document.querySelector('[data-trailer="fantasy"]');
+  if (fantasyBox && PACKS.fantasy) {
+    trailer(fantasyBox, 12, (a, t) => {
+      const { ctx, W, H, frame, state } = a, G = 80;
+      if (!state.motes) {
+        state.motes = Array.from({ length: 26 }, () => ({ x: rand(0, W), s: rand(0, 1), v: rand(0.04, 0.09), c: Math.random() < 0.5 ? '#B07CFF' : '#7FE8FF' }));
+        state.stars = Array.from({ length: 30 }, () => [rand(0, W), rand(0, 40), rand(0, 6)]);
+        state.sparks = []; state.magic = [];
+      }
+      const sky = ctx.createLinearGradient(0, 0, 0, G); sky.addColorStop(0, '#2A1E5A'); sky.addColorStop(0.7, '#6A4A9A'); sky.addColorStop(1, '#E89A8A');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, G);
+      for (const [x, y, k] of state.stars) a.rect(x, y, 1, 1, `rgba(255,255,255,${0.3 + 0.5 * Math.abs(Math.sin(t * 1.3 + k))})`);
+      a.rect(30, 10, 10, 10, '#F4EED8'); a.rect(33, 10, 7, 10, '#2A1E5A'); a.rect(33, 12, 6, 6, '#2A1E5A');           // crescent moon
+      for (let x = 0; x < W; x += 10) { const h = 18 + (x * 13) % 12; a.rect(x + 3, G - h, 4, h, '#3A2A5E'); a.rect(x + 1, G - h + 4, 8, h - 4, '#3A2A5E'); }   // pine silhouettes
+      a.rect(0, G, W, H - G, '#3E6A3A'); a.rect(0, G, W, 2, '#2E5A2E');
+      for (let x = 70; x < 170; x += 6) a.rect(x, G + 3, 4, 2, '#8A7A66');                                             // path stones
+      glow(a, 196, G - 26, 24, '176,124,255', 0.6 + Math.sin(t * 2) * 0.15);
+      a.put('fantasy', 'tower', 196, G, { frame });
+      a.put('fantasy', 'burrow', 34, G, { frame });
+      if (has('fantasy', 'forge')) { glow(a, 128, G - 8, 18, '255,140,60', 0.7 + Math.sin(t * 10) * 0.15); a.put('fantasy', 'forge', 128, G, { frame }); }
+      // dwarf hammering at the forge, sparks flying
+      if (has('fantasy', 'dwarf')) {
+        a.put('fantasy', 'dwarf', 110, G, { pose: 'idle', frame });
+        if (frame && Math.random() < 0.5) for (let i = 0; i < 3; i++) state.sparks.push({ x: 116, y: G - 8, vx: rand(-14, 14), vy: rand(-26, -12), life: 0 });
+      }
+      state.sparks = state.sparks.filter(s => (s.life += 1 / 60) < 0.6);
+      for (const s of state.sparks) a.rect(s.x + s.vx * s.life, s.y + s.vy * s.life + 40 * s.life * s.life, 1, 1, '#FFD84A');
+      // the knight patrols, the ranger strolls, the wizard casts
+      const kx = 60 + Math.sin(t * 0.5) * 40;
+      a.put('fantasy', 'knight', kx, G, { pose: 'walk', frame, flip: Math.cos(t * 0.5) < 0 });
+      a.put('fantasy', 'ranger', lerp(-20, 80, span(t, 1, 7)), G, t > 1 && t < 7 ? { pose: 'walk', frame } : { pose: 'idle', frame });
+      a.put('fantasy', 'wizard', 168, G, { pose: 'idle', frame, flip: true });
+      if (t % 3 < 0.05 && state.lastCast !== Math.floor(t / 3)) { state.lastCast = Math.floor(t / 3); for (let i = 0; i < 14; i++) state.magic.push({ a: rand(0, Math.PI * 2), r: 0, v: rand(10, 22), life: 0 }); }
+      state.magic = state.magic.filter(m => (m.life += 1 / 60) < 1.1);
+      for (const m of state.magic) { const r = m.v * m.life; a.rect(166 + Math.cos(m.a) * r, G - 22 + Math.sin(m.a) * r, 1, 1, m.life < 0.5 ? '#FFFFFF' : '#B07CFF'); }
+      // drifting magic motes
+      for (const m of state.motes) { const k = (m.s + t * m.v) % 1; a.rect(m.x + Math.sin(t + m.x) * 4, G - k * G, 1, 1, m.c); }
+    });
+  }
+
   // ---------- Jolly Winter ----------
   const winterBox = document.querySelector('[data-trailer="winter"]');
   if (winterBox && PACKS.winter) {

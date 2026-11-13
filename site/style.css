@@ -428,3 +428,4 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .pack-card.soon .pack-card-head, .pack-card.soon p { grid-column: 1; }
 .pack-card.soon .pack-cta { grid-column: 2; grid-row: 1 / span 3; margin: 0; align-self: center; }
 @media (max-width: 640px) { .pack-card.soon { display: flex; } .pack-card.soon .pack-cta { margin-top: 1.2rem; align-self: flex-start; } }
+.pack-card .trailer:not(.big) .trailer-toggle { top: 6px; bottom: auto; right: 6px; font-size: .72rem; padding: 0 7px; opacity: .85; }
