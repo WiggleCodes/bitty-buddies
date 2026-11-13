@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bitty Buddies status</title>
+  <meta name="description" content="Live status of the Bitty Buddies download, update, licence key and report services.">
+  <meta property="og:title" content="Bitty Buddies">
+  <meta property="og:description" content="Tiny pixel pets that wander along the bottom of your screen.">
+  <meta property="og:image" content="banner.png">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=202611122256">
+</head>
+<body class="status-page">
+  <header class="topbar">
+    <a class="brand" href="./">Bitty Buddies</a>
+    <nav aria-label="Main">
+      <a href="./">Home</a>
+      <a href="packs.html">Packs</a>
+      <a href="status.html" aria-current="page">Status</a>
+      <a href="https://discord.gg/aCHyjABJG7">Discord</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="layer stone-layer">
+      <div class="wrap">
+        <h1 class="page-title">Service status</h1>
+        <div class="status-banner checking" id="banner" role="status" aria-live="polite">
+          <span class="lamp" aria-hidden="true"></span>
+          <span id="banner-text">Checking everything…</span>
+        </div>
+        <ul class="status-list" id="list" aria-label="Services"></ul>
+        <p class="status-note">Checked <span id="checked">just now</span>. This page checks again every minute. Your buddies keep running on your desktop even if a service is down, because only downloads, updates, licence keys and reports need the internet.</p>
+        <p class="status-note">Something broken that isn't shown here? Tell us in the <a href="https://discord.gg/aCHyjABJG7">Discord</a>, or use "Report a problem…" in the app's tray menu.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bedrock">
+    <div class="wrap">
+      <p>© 2026 WiggleCodes. All rights reserved. The code is public to read, not to copy or re-upload.</p>
+      <p>Privacy: the app sends an anonymous "+1" once a day so we can count users. No name, ID or files are sent, and you can turn it off in the tray menu. If you use “Report a problem…”, we only get what you type and, if you leave it ticked, basic app details like the version and your Windows version.</p>
+      <p class="links"><a href="https://discord.gg/aCHyjABJG7">Discord</a> <a href="https://ko-fi.com/bittybuddies">Ko-fi</a></p>
+    </div>
+  </footer>
+
+  <script src="status.js?v=202611122256"></script>
+</body>
+</html>
