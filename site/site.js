@@ -90,6 +90,13 @@
       .forEach(def => box.appendChild(gridToCanvas(PX.drawItem(def, { pose: 'idle', frame: 0, blink: false }))));
   });
 
+  // ---------- team avatars: a big pixel buddy ----------
+  document.querySelectorAll('[data-avatar]').forEach(box => {
+    const [pack, key] = box.dataset.avatar.split('/');
+    const item = PACKS[pack] && PACKS[pack].items[key];
+    if (item) box.appendChild(gridToCanvas(PX.drawItem(PX.withDefaults(item), { pose: 'idle', frame: 0, blink: false })));
+  });
+
   // ---------- the meadow ----------
   const canvas = document.getElementById('meadow');
   if (!canvas) return;                       // the packs page has no meadow

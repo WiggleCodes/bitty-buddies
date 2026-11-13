@@ -272,3 +272,15 @@ h3 { font: 700 1.4rem var(--display); margin: 2.2rem 0 .8rem; display: flex; ali
 .foot-legal { grid-column: 1 / -1; border-top: 2px solid rgba(255,255,255,.1); padding-top: 16px; font-size: .88rem; color: #A9AFB9; }
 .foot-legal p { margin: .3rem 0; max-width: 60rem; }
 @media (max-width: 640px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-about { grid-column: 1 / -1; } }
+
+/* team page */
+.member { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 1.8rem; background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 6px 6px 0 rgba(0,0,0,.35); padding: 24px; max-width: 58rem; }
+.member-avatar { aspect-ratio: 1; display: grid; place-items: center; background: linear-gradient(var(--sky-top), var(--sky-low) 72%, var(--grass) 72% 80%, var(--dirt) 80%); border: 3px solid var(--ink); padding: 18px 18px 30px; }
+.member-avatar canvas { width: 80%; height: auto; image-rendering: pixelated; }
+.member-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.member-head h2 { margin: 0; color: var(--ink); text-shadow: none; }
+.member-body p { margin: .8rem 0 0; max-width: 40rem; }
+.member-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1.2rem; }
+.join-team { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+.join-team .btn.big { margin-top: 0; }
+@media (max-width: 640px) { .member { grid-template-columns: 1fr; } .member-avatar { width: 9rem; } }
