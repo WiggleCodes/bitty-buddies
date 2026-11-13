@@ -243,6 +243,71 @@ ipcMain.handle('report:send', async (_e, data) => {
 });
 ipcMain.on('report:close', () => { if (reportWin) reportWin.close(); });
 
+// ---------- account: "Sign in to restore my packs" ----------
+// Opens the account server's sign-in page. Once signed in, it fetches the keys saved to the
+// account, unlocks each one on this PC, then signs out again (nothing about the account is kept here).
+const ACCOUNT_API = REPORT_URL ? new URL(REPORT_URL).origin : '';
+let signInWin = null;
+
+function openSignInWindow() {
+  if (!ACCOUNT_API) return;
+  if (signInWin) { signInWin.show(); signInWin.focus(); return; }
+  signInWin = new BrowserWindow({
+    width: 480, height: 640, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+    title: 'Sign in to Bitty Buddies', alwaysOnTop: true, autoHideMenuBar: true, show: false,
+    webPreferences: { partition: 'bitty-account', contextIsolation: true, nodeIntegration: false, sandbox: true }
+  });
+  let done = false;
+  const check = url => {
+    const m = String(url).match(/\/account\/signed-in#token=([0-9a-f]{64})/);
+    if (!m || done) return;
+    done = true;
+    restorePacks(m[1]).finally(() => setTimeout(() => signInWin && !signInWin.isDestroyed() && signInWin.close(), 400));
+  };
+  const wc = signInWin.webContents;
+  wc.on('will-redirect', (_e, url) => check(url));
+  wc.on('did-navigate', (_e, url) => check(url));
+  wc.on('did-redirect-navigation', (_e, url) => check(url));
+  wc.on('did-navigate-in-page', (_e, url) => check(url));
+  wc.setWindowOpenHandler(({ url }) => { if (/^https:\/\//.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+  signInWin.loadURL(`${ACCOUNT_API}/account/app`);
+  signInWin.once('ready-to-show', () => signInWin.show());
+  signInWin.on('closed', () => { signInWin = null; });
+  if (IS_MAC) app.focus({ steal: true });
+}
+
+async function restorePacks(token) {
+  const auth = { authorization: `Bearer ${token}` };
+  let data;
+  try {
+    const res = await net.fetch(`${ACCOUNT_API}/account/me`, { headers: auth });
+    data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'The account server said no.');
+  } catch (e) {
+    dialog.showMessageBox({ type: 'error', message: 'Couldn’t load your account', detail: e.message || 'Check you’re online and try again.' });
+    return;
+  }
+  net.fetch(`${ACCOUNT_API}/account/logout`, { method: 'POST', headers: auth }).catch(() => {});
+  const usable = (data.keys || []).filter(k => !k.revoked && k.key);
+  const unlocked = new Set();
+  let already = 0, failed = 0;
+  for (const k of usable) {
+    try { (await licence.activate(k.key)).forEach(id => unlocked.add((PACKS.find(p => p.id === id) || {}).name || id)); }
+    catch (e) { if (/already active/.test(e.message)) already++; else failed++; }
+  }
+  if (unlocked.size) refreshUnlocks();
+  const who = data.user ? data.user.username : 'your account';
+  if (!usable.length) {
+    dialog.showMessageBox({ type: 'info', message: `Signed in as ${who}`, detail: 'There are no licence keys on this account yet. When you buy a pack, it’s added to your account and you can restore it here.' });
+  } else if (unlocked.size) {
+    dialog.showMessageBox({ type: 'info', message: `🎉 Unlocked ${[...unlocked].join(' and ')}`, detail: `Your packs from ${who} are ready on this PC.` });
+  } else if (already && !failed) {
+    dialog.showMessageBox({ type: 'info', message: 'You’re all set', detail: `Everything on ${who} is already unlocked on this PC.` });
+  } else {
+    dialog.showMessageBox({ type: 'warning', message: 'Some keys couldn’t be unlocked', detail: 'Ask on the Bitty Buddies Discord and we’ll sort it out.' });
+  }
+}
+
 ipcMain.on('thing-menu', (_e, { uid, id }) => {
   const item = ITEMS[id];
   if (!item || !win) return;
@@ -330,6 +395,7 @@ function buildTrayMenu() {
     },
     { type: 'separator' },
     { label: licence.status().active ? 'Licence keys…' : 'Enter licence key…', click: openLicenceWindow },
+    ...(ACCOUNT_API ? [{ label: 'Sign in to restore my packs…', click: openSignInWindow }] : []),
     readyVersion
       ? { label: `🎉 Restart to update to v${readyVersion}`, click: () => setImmediate(() => autoUpdater.quitAndInstall()) }
       : { label: 'Check for updates…', click: () => checkForUpdates(true) },
