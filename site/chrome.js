@@ -40,7 +40,6 @@
       </div>
       <nav class="menu-panel" id="menu-panel" aria-label="Main" hidden>
         ${TABS.map(tab).join('')}${ELSEWHERE.map(out).join('')}
-        <a class="btn grass" href="${DOWNLOAD}" data-download>Download for Windows</a>
       </nav>`;
     const btn = head.querySelector('.menu-btn');
     const panel = head.querySelector('.menu-panel');
