@@ -14,8 +14,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=202611122256">
 </head>
-<body>
-  <header class="hero" id="top">
+<body data-page="home">
+  <header id="site-header"></header>
+  <script src="chrome.js?v=202611122256"></script>
+
+  <section class="hero" id="top">
     <div class="clouds" aria-hidden="true"></div>
     <div class="hero-copy">
       <h1>Bitty Buddies</h1>
@@ -25,40 +28,41 @@
         <a class="btn stone" href="packs.html">See the packs</a>
         <a class="btn discord" href="https://discord.gg/aCHyjABJG7">Join the Discord<span class="discord-count" hidden></span></a>
       </div>
-      <p class="small">Free for Windows, and it updates itself. Extra packs coming soon.</p>
+      <p class="small">Free for Windows 10 and 11, and it updates itself.</p>
     </div>
     <canvas id="meadow" aria-label="Pixel pets wandering on grass. Click one to make it jump, or drag to throw it."></canvas>
     <p class="hint" aria-hidden="true">Psst, click a buddy. Or pick one up.</p>
-  </header>
+  </section>
 
   <main>
     <section class="layer dirt" id="buddies">
-      <div class="wrap">
-        <h2>Meet the buddies</h2>
-        <p class="lede">Spawn as many as you like from the tray menu. Each one has its own walk, nap and personality.</p>
-
-        <h3>Critters</h3>
-        <div class="inventory" data-pack="critters"></div>
-
-        <h3>Fantasy Folk <span class="lock">🔒 Coming soon</span></h3>
-        <div class="inventory" data-pack="fantasy"></div>
-
-        <h3>Builds</h3>
-        <div class="inventory builds" data-pack="builds"></div>
-        <p class="detail" id="detail" aria-live="polite">Hover or tap a slot to see who's who.</p>
+      <div class="wrap split">
+        <div class="split-side">
+          <h2>Meet the buddies</h2>
+          <p class="lede">Spawn as many as you like from the tray menu. Each one has its own walk, nap and personality.</p>
+          <p class="detail-card" id="detail" aria-live="polite">Hover or tap a slot to see who's who.</p>
+        </div>
+        <div class="split-main">
+          <h3>Critters <span class="tag free">Free</span></h3>
+          <div class="inventory" data-pack="critters"></div>
+          <h3>Builds <span class="tag free">Free</span></h3>
+          <div class="inventory builds" data-pack="builds"></div>
+          <h3>Fantasy Folk <span class="tag">Coming soon</span></h3>
+          <div class="inventory" data-pack="fantasy"></div>
+        </div>
       </div>
     </section>
 
     <section class="layer deep-dirt" id="features">
       <div class="wrap">
         <h2>They live on your desktop</h2>
-        <ul class="features">
-          <li><strong>Click to say hi.</strong> Buddies jump and pop a heart.</li>
-          <li><strong>Pick them up.</strong> Drag a buddy anywhere and fling it. It'll bounce.</li>
-          <li><strong>Build a little camp.</strong> Place a shrine, campfire or lantern and watch pets curl up beside it.</li>
-          <li><strong>Out of your way.</strong> Clicks pass straight through to whatever's underneath.</li>
-          <li><strong>Always fresh.</strong> New versions download and install on their own.</li>
-          <li><strong>Grow your crew.</strong> Paid packs like Fantasy Folk add wizards, knights, cottages and towers.</li>
+        <ul class="feature-grid">
+          <li><strong>Click to say hi</strong><span>Buddies jump and pop a heart.</span></li>
+          <li><strong>Pick them up</strong><span>Drag a buddy anywhere and fling it. It'll bounce.</span></li>
+          <li><strong>Build a little camp</strong><span>Place a shrine, campfire or lantern and watch pets curl up beside it.</span></li>
+          <li><strong>Out of your way</strong><span>Clicks pass straight through to whatever's underneath.</span></li>
+          <li><strong>Always fresh</strong><span>New versions download and install on their own.</span></li>
+          <li><strong>Grow your crew</strong><span>Extra packs add wizards, knights, cottages and towers.</span></li>
         </ul>
       </div>
     </section>
@@ -77,8 +81,13 @@
 
     <section class="layer pricing-layer" id="packs">
       <div class="wrap">
-        <h2>Unlock more buddies</h2>
-        <p class="lede">Bitty Buddies, the Critters and the Builds are free forever. Extra packs add new buddies, builds and tricks, unlocked with a one-off licence key that holds every pack you own.</p>
+        <div class="section-head">
+          <div>
+            <h2>Unlock more buddies</h2>
+            <p class="lede">The Critters and the Builds are free forever. Extra packs add new buddies, builds and tricks, unlocked with one licence key that holds every pack you own.</p>
+          </div>
+          <a class="btn stone" href="packs.html">See all the packs</a>
+        </div>
         <div class="pack-tiles">
           <a class="pack-tile" href="packs.html#fantasy">
             <span class="tile-sprites" data-tile="fantasy" aria-hidden="true"></span>
@@ -93,7 +102,6 @@
             <strong>Jolly Winter</strong><span>Free from 1 December</span>
           </a>
         </div>
-        <a class="btn stone big" href="packs.html">See all the packs</a>
       </div>
     </section>
 
@@ -101,23 +109,19 @@
       <div class="wrap">
         <h2>Get started</h2>
         <ol class="steps">
-          <li><span class="n">1</span><div><strong>Download</strong> the Windows installer from the latest release.</div></li>
-          <li><span class="n">2</span><div><strong>Find the little dog</strong> in your system tray or menu bar.</div></li>
+          <li><span class="n">1</span><div><strong>Download</strong> the installer for Windows. It's free.</div></li>
+          <li><span class="n">2</span><div><strong>Find the little dog</strong> in your system tray, by the clock.</div></li>
           <li><span class="n">3</span><div><strong>Spawn a buddy</strong> from the Spawn menu, and you're done.</div></li>
         </ol>
-        <a class="btn grass big" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest/download/Bitty-Buddies-Setup.exe" data-download>Get Bitty Buddies</a>
+        <div class="start-actions">
+          <a class="btn grass big" href="https://github.com/WiggleCodes/bitty-buddies/releases/latest/download/Bitty-Buddies-Setup.exe" data-download>Get Bitty Buddies</a>
+          <a class="status-link" href="status.html"><span class="lamp" aria-hidden="true"></span>Check service status</a>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="bedrock">
-    <div class="wrap">
-      <p>© 2026 WiggleCodes. All rights reserved. The code is public to read, not to copy or re-upload.</p>
-      <p>Privacy: the app sends an anonymous "+1" once a day so we can count users. No name, ID or files are sent, and you can turn it off in the tray menu. If you use “Report a problem…”, we only get what you type and, if you leave it ticked, basic app details like the version and your Windows version.</p>
-      <p class="links"><a href="https://discord.gg/aCHyjABJG7">Discord</a> <a href="https://ko-fi.com/bittybuddies">Ko-fi</a> <a href="status.html">Service status</a></p>
-    </div>
-  </footer>
-
+  <footer id="site-footer" class="bedrock site-footer"></footer>
   <script src="js/pixel.js?v=202611122256"></script>
   <script src="js/packs/critters.js?v=202611122256"></script>
   <script src="js/packs/fantasy.js?v=202611122256"></script>

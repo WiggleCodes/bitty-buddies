@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bitty Buddies members</title>
+  <meta name="description" content="The Bitty Buddies community: members and their badges.">
+  <meta property="og:title" content="Bitty Buddies">
+  <meta property="og:description" content="Tiny pixel pets that wander along the bottom of your screen.">
+  <meta property="og:image" content="banner.png">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=202611122256">
+</head>
+<body class="members-page" data-page="members">
+  <header id="site-header"></header>
+  <script src="chrome.js?v=202611122256"></script>
+
+  <main>
+    <section class="layer dirt">
+      <div class="wrap">
+        <h1 class="page-title">Members</h1>
+        <p class="lede">Everyone in the Bitty Buddies community, and the badges they've earned.</p>
+        <p class="account-msg" id="msg" role="alert" hidden></p>
+
+        <div class="auth-card members-gate" id="gate" hidden>
+          <h2>Members only</h2>
+          <p>Sign in to see the community and everyone's badges.</p>
+          <a class="btn grass" href="account.html">Sign in or create an account</a>
+        </div>
+
+        <div id="members" hidden>
+          <div class="members-tools">
+            <input id="m-search" type="search" placeholder="Search members" aria-label="Search members" maxlength="40">
+            <div class="badge-filter" id="m-filter" role="group" aria-label="Filter by badge"></div>
+          </div>
+          <p class="members-count" id="m-count" aria-live="polite"></p>
+          <ul class="member-grid" id="m-grid"></ul>
+          <details class="badge-legend">
+            <summary>What do the badges mean?</summary>
+            <ul id="m-legend"></ul>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="bedrock site-footer"></footer>
+  <script src="js/pixel.js?v=202611122256"></script>
+  <script src="js/packs/critters.js?v=202611122256"></script>
+  <script src="js/packs/fantasy.js?v=202611122256"></script>
+  <script src="site.js?v=202611122256"></script>
+  <script src="badges.js?v=202611122256"></script>
+  <script src="members.js?v=202611122256"></script>
+</body>
+</html>
