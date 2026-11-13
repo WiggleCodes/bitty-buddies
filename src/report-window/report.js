@@ -11,6 +11,15 @@ window.report.details().then(d => {
   $('preview').textContent = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join('\n');
 });
 
+window.report.status().then(st => {
+  const reports = st && st.services && st.services.find(x => x.id === 'reports');
+  const up = !!(reports && reports.ok);
+  $('status').className = 'status ' + (up ? 'up' : 'down');
+  $('status-text').textContent = up
+    ? 'Report service is online.'
+    : st && st.offline ? "You look to be offline. Reports need the internet." : 'The report service is having problems right now. Please try later, or ask in the Discord.';
+});
+
 $('send').onclick = async () => {
   const text = $('message').value.trim();
   if (text.length < 10) { message('Describe the problem in a few more words.'); $('message').focus(); return; }

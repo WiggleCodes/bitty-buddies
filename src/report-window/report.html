@@ -31,6 +31,11 @@
     .msg { min-height: 20px; margin-top: 12px; font-size: 13px; }
     .err { color: var(--red); } .good { color: var(--ok); }
     .hidden { display: none; }
+    .status { display: flex; gap: 8px; align-items: center; font-size: 12px; padding: 6px 8px; border: 2px solid var(--ink); background: #fff; }
+    .status .dot { width: 10px; height: 10px; flex: none; background: #B8C0CC; border: 2px solid var(--ink); }
+    .status.up .dot { background: var(--grass); }
+    .status.down { background: #FDECEA; }
+    .status.down .dot { background: var(--red); }
   </style>
 </head>
 <body>
@@ -38,6 +43,7 @@
     <div id="form">
       <h1>🐞 Report a problem</h1>
       <p>Something not working right? Tell us what happened and we'll take a look.</p>
+      <p id="status" class="status checking"><span class="dot"></span><span id="status-text">Checking the report service…</span></p>
       <label for="message">What went wrong?</label>
       <textarea id="message" maxlength="2000" placeholder="e.g. My pup walks off the edge of my second screen and never comes back." autofocus></textarea>
       <div class="count"><span id="count">0</span> / 2000</div>

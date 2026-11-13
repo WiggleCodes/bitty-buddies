@@ -186,6 +186,7 @@ ipcMain.on('licence:close', () => { if (licenceWin) licenceWin.close(); });
 
 // ---------- report a problem ----------
 const REPORT_URL = (pkg.bitty && pkg.bitty.reportUrl) || '';
+const STATUS_PAGE = 'https://wigglecodes.github.io/bitty-buddies/status.html';
 let reportWin = null;
 
 function openReportWindow() {
@@ -215,6 +216,14 @@ function reportDetails() {
 }
 
 ipcMain.handle('report:details', () => reportDetails());
+// Asks the server whether reports (and the other online services) are working right now.
+ipcMain.handle('report:status', async () => {
+  if (!REPORT_URL) return { ok: false };
+  try {
+    const res = await net.fetch(REPORT_URL.replace(/\/report$/, '/status'), { cache: 'no-store' });
+    return res.ok ? await res.json() : { ok: false };
+  } catch { return { ok: false, offline: true }; }
+});
 ipcMain.handle('report:send', async (_e, data) => {
   const msg = String((data && data.message) || '').trim().slice(0, 2000);
   if (msg.length < 10) return { error: 'Describe the problem in a few more words.' };
@@ -325,6 +334,7 @@ function buildTrayMenu() {
       ? { label: `🎉 Restart to update to v${readyVersion}`, click: () => setImmediate(() => autoUpdater.quitAndInstall()) }
       : { label: 'Check for updates…', click: () => checkForUpdates(true) },
     { label: 'Report a problem…', click: openReportWindow },
+    { label: 'Service status', click: () => shell.openExternal(STATUS_PAGE) },
     { label: 'Quit', click: () => app.quit() }
   ]);
   tray.setContextMenu(menu);
