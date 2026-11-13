@@ -5,20 +5,6 @@
   let token = null;
   try { token = localStorage.getItem('bb-account'); } catch { /* none */ }
   let all = [], badges = [], filter = null;
-  const PX = window.BBPixel, PETS = ((window.BBPacks || []).find(p => p.id === 'critters') || { items: {} }).items;
-  const petKeys = Object.keys(PETS).filter(k => (PETS[k].kind || 'pet') === 'pet');
-
-  // People without a Discord picture get a pixel critter, picked from their name so it never changes.
-  function critter(name) {
-    let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    const item = PETS[petKeys[h % petKeys.length]];
-    const grid = PX.drawItem(PX.withDefaults(item), { pose: 'idle', frame: 0, blink: false });
-    const c = document.createElement('canvas'); c.width = grid[0].length; c.height = grid.length;
-    const x = c.getContext('2d');
-    grid.forEach((row, j) => row.forEach((col, i) => { if (col) { x.fillStyle = col; x.fillRect(i, j, 1, 1); } }));
-    return c;
-  }
-
   const say = t => { $('msg').textContent = t; $('msg').hidden = !t; };
 
   function draw() {
@@ -32,8 +18,7 @@
       li.className = 'member-tile';
       const av = document.createElement('div');
       av.className = 'member-pic';
-      if (m.avatar) { const img = document.createElement('img'); img.src = m.avatar; img.alt = ''; img.loading = 'lazy'; img.onerror = () => { img.replaceWith(critter(m.username)); }; av.appendChild(img); }
-      else av.appendChild(critter(m.username));
+      BBAvatar(av, m);
       const name = document.createElement('strong'); name.className = 'member-tile-name'; name.textContent = m.name;
       const handle = document.createElement('span'); handle.className = 'member-tile-handle'; handle.textContent = '@' + m.username;
       const chips = document.createElement('div'); chips.className = 'member-badges';

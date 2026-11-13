@@ -60,7 +60,8 @@
           </div>
           <div class="account-grid">
             <aside class="profile-card">
-              <div class="profile-avatar" data-avatar="critters/pup"><img alt="" hidden></div>
+              <div class="profile-avatar" id="p-avatar"></div>
+              <button class="link-btn" id="pic-open" type="button">Change picture</button>
               <strong class="profile-name" id="p-name"></strong>
               <span class="profile-sub" id="p-sub"></span>
               <div class="profile-badges" id="p-badges"></div>
@@ -68,6 +69,25 @@
             </aside>
 
             <div class="account-main">
+              <section class="panel picker" id="picker" hidden>
+                <h2>Choose your picture</h2>
+                <div class="picker-body">
+                  <div class="picker-preview"><div class="profile-avatar big" id="pk-preview"></div></div>
+                  <div class="picker-options">
+                    <label class="toggle-row" id="pk-discord-row" hidden><input type="checkbox" id="pk-discord"> Use my Discord picture</label>
+                    <strong class="picker-label">Pick a buddy</strong>
+                    <div class="pet-grid" id="pk-pets" role="radiogroup" aria-label="Buddy"></div>
+                    <p class="field-hint" id="pk-locked-note" hidden>🔒 buddies come with paid packs. Once a pack is on your account, they're yours to use.</p>
+                    <strong class="picker-label">Background</strong>
+                    <div class="swatches" id="pk-bgs" role="radiogroup" aria-label="Background colour"></div>
+                    <div class="picker-actions">
+                      <button class="btn grass small" id="pk-save" type="button">Save picture</button>
+                      <button class="btn stone small" id="pk-cancel" type="button">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               <section class="panel">
                 <h2>Your licence keys</h2>
                 <ul class="key-list" id="keys"></ul>
@@ -118,6 +138,7 @@
   <footer id="site-footer" class="bedrock site-footer"></footer>
   <script src="js/pixel.js?v=202611122256"></script>
   <script src="js/packs/critters.js?v=202611122256"></script>
+  <script src="js/packs/fantasy.js?v=202611122256"></script>
   <script src="site.js?v=202611122256"></script>
   <script src="badges.js?v=202611122256"></script>
   <script src="account.js?v=202611122256"></script>

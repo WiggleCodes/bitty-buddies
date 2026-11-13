@@ -54,13 +54,7 @@
 
     $('p-name').textContent = u.discord ? u.discord.name : u.username;
     $('p-sub').textContent = `@${u.username}` + (u.created ? ` · joined ${new Date(u.created).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}` : '');
-    const box = document.querySelector('.profile-avatar');
-    const img = box.querySelector('img');
-    if (u.discord && u.discord.avatar) {
-      img.onload = () => { img.hidden = false; box.classList.add('photo'); };
-      img.alt = `${u.discord.name}'s Discord picture`;
-      img.src = u.discord.avatar;
-    } else { img.hidden = true; box.classList.remove('photo'); }
+    BBAvatar($('p-avatar'), lookOf(u));
 
     const pb = $('p-badges');
     pb.textContent = '';
@@ -109,6 +103,67 @@
     $('pw-current').required = !!u.hasPassword;
     document.querySelector('.pw-current').firstChild.textContent = u.mustChange ? 'Temporary password ' : 'Current password ';
   }
+
+  // ---------- picture picker ----------
+  const BGS = ['#8FCBF0', '#6CBE4E', '#F2A93B', '#E0518E', '#8E5BD8', '#2E345C', '#C8392F', '#EEF3F7', '#2FA58B', '#7C573A'];
+  const PAID = { fantasy: 'fantasy' };   // pack -> licence pack needed
+  const lookOf = (u, look = u.look || {}) => ({
+    username: u.username, pet: look.pet || null, bg: look.bg || null,
+    avatar: u.discord && u.discord.avatar && look.useDiscord !== false ? u.discord.avatar : null
+  });
+  let draft = null;
+  function openPicker() {
+    const u = current.user;
+    const owned = new Set(current.keys.filter(k => !k.revoked).flatMap(k => k.packs));
+    draft = { pet: (u.look && u.look.pet) || null, bg: (u.look && u.look.bg) || BGS[0], useDiscord: !!(u.discord && u.discord.avatar) && !(u.look && u.look.useDiscord === false) };
+    $('pk-discord-row').hidden = !(u.discord && u.discord.avatar);
+    $('pk-discord').checked = draft.useDiscord;
+    const pets = $('pk-pets'); pets.textContent = '';
+    let anyLocked = false;
+    for (const pack of window.BBPacks || []) {
+      if (!['critters', 'fantasy'].includes(pack.id)) continue;
+      for (const [key, item] of Object.entries(pack.items)) {
+        if ((item.kind || 'pet') !== 'pet') continue;
+        const id = `${pack.id}/${key}`;
+        const locked = PAID[pack.id] && !owned.has(PAID[pack.id]);
+        anyLocked = anyLocked || locked;
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'pet-pick' + (locked ? ' locked' : ''); b.setAttribute('role', 'radio');
+        b.setAttribute('aria-label', item.name + (locked ? ' (comes with a paid pack)' : ''));
+        b.title = locked ? `${item.name} comes with ${pack.name}` : item.name;
+        b.disabled = locked;
+        const c = BBPetCanvas(id); if (c) b.appendChild(c);
+        if (locked) { const l = document.createElement('span'); l.className = 'lock-tag'; l.textContent = '🔒'; b.appendChild(l); }
+        b.onclick = () => { draft.pet = id; draft.useDiscord = false; $('pk-discord').checked = false; sync(); };
+        b.dataset.id = id;
+        pets.appendChild(b);
+      }
+    }
+    $('pk-locked-note').hidden = !anyLocked;
+    const sw = $('pk-bgs'); sw.textContent = '';
+    for (const bg of BGS) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'swatch'; b.style.background = bg; b.setAttribute('role', 'radio'); b.setAttribute('aria-label', `Background ${bg}`); b.dataset.bg = bg;
+      b.onclick = () => { draft.bg = bg; if (!draft.pet) draft.pet = 'critters/pup'; draft.useDiscord = false; $('pk-discord').checked = false; sync(); };
+      sw.appendChild(b);
+    }
+    $('picker').hidden = false;
+    sync();
+    $('picker').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function sync() {
+    const u = current.user;
+    BBAvatar($('pk-preview'), lookOf(u, draft.pet || draft.useDiscord ? draft : { ...draft, pet: null }));
+    for (const b of $('pk-pets').children) b.setAttribute('aria-checked', String(b.dataset.id === draft.pet && !draft.useDiscord));
+    for (const b of $('pk-bgs').children) b.setAttribute('aria-checked', String(b.dataset.bg === draft.bg && !draft.useDiscord));
+  }
+  $('pic-open').addEventListener('click', openPicker);
+  $('pk-cancel').addEventListener('click', () => { $('picker').hidden = true; });
+  $('pk-discord').addEventListener('change', e => { draft.useDiscord = e.currentTarget.checked; sync(); });
+  $('pk-save').addEventListener('click', e => busy(e.currentTarget, async () => {
+    const d = await call('/account/look', 'POST', { pet: draft.pet || undefined, bg: draft.bg, useDiscord: draft.useDiscord });
+    $('picker').hidden = true; render(d); say(d.message, true);
+  }));
 
   function signOutLocal() { token = null; store.set(null); showSignedOut(); }
 
