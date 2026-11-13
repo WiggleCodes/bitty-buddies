@@ -72,6 +72,7 @@
     "revokedApi": "https://api.github.com/repos/WiggleCodes/bitty-buddies/contents/revoked.json",
     "statsApi": "https://abacus.jasoncameron.dev",
     "statsNamespace": "bitty-buddies",
-    "reportUrl": "https://bitty-admin.reece-feetenby.workers.dev/report"
+    "reportUrl": "https://bitty-admin.reece-feetenby.workers.dev/report",
+    "channel": "stable"
   }
 }

@@ -1,0 +1,44 @@
+# Hands a test version to everyone: turns the GitHub pre-release into the latest full release,
+# so every app updates to it, and posts it to the Discord #updates channel.
+# Actions tab → Promote test version → Run workflow, and type the version (e.g. v1.2.0).
+name: Promote test version
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Test version to release to everyone, e.g. v1.2.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Make it a full release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release view "$TAG" --json isPrerelease -q .isPrerelease | grep -q true || { echo "$TAG isn't a test version"; exit 1; }
+          gh release edit "$TAG" --prerelease=false --latest --title "Bitty Buddies $TAG"
+      - name: Post to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret; skipping"; exit 0; fi
+          URL="https://wigglecodes.github.io/bitty-buddies/"
+          NOTES="Your app will update itself next time it checks. New here? Grab it from the link above."
+          if [ -f "release-notes/$TAG.md" ]; then NOTES="$(tail -n +2 "release-notes/$TAG.md" | head -c 3800)"; fi
+          jq -n --arg tag "$TAG" --arg url "$URL" --arg notes "$NOTES" '{
+            username: "Bitty Buddies",
+            avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
+            embeds: [{ title: ("🆕 Bitty Buddies " + $tag + " is out!"), url: $url, description: $notes, color: 7126606 }]
+          }' > payload.json
+          curl -fsS -H "Content-Type: application/json" -d @payload.json "$WEBHOOK"

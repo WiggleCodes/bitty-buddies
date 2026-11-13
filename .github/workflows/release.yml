@@ -5,6 +5,12 @@
 #   - if it already has one, it rebuilds that version in place and replaces its downloads
 # Pushing a v* tag yourself also publishes, and so does pushing a new "version" in
 # package.json to main (it's skipped if that version is already released).
+#
+# Test versions: set "bitty": { "channel": "test" } in package.json with the version bump.
+# The release is published as a GitHub pre-release, so only people who ticked
+# "Get early test versions" in the tray get it, and it's posted to the testers channel
+# (DISCORD_TESTERS_WEBHOOK) instead of #updates. When it's good, run the "Promote test
+# version" workflow to hand the same version to everyone.
 name: Release
 
 on:
@@ -22,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
+      test: ${{ steps.tag.outputs.test }}
       inplace: ${{ steps.tag.outputs.inplace }}
       skip: ${{ steps.tag.outputs.skip }}
     steps:
@@ -33,6 +40,9 @@ jobs:
         run: |
           TAG="v$(node -p "require('./package.json').version")"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          TEST="$(node -p "(require('./package.json').bitty || {}).channel === 'test'")"
+          echo "test=$TEST" >> "$GITHUB_OUTPUT"
+          if [ "$TEST" = "true" ]; then PRE=(--prerelease); else PRE=(); fi
           if [ "${{ github.ref_type }}" = "tag" ]; then
             echo "inplace=false" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.event_name }}" = "push" ] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
@@ -47,7 +57,7 @@ jobs:
             git tag "$TAG" && git push origin "$TAG"
             # Create the release once here; the Windows build adds its files to it.
             if [ -f "release-notes/$TAG.md" ]; then NOTES=(--notes-file "release-notes/$TAG.md"); else NOTES=(--notes "Bitty Buddies $TAG"); fi
-            gh release create "$TAG" --title "Bitty Buddies $TAG" "${NOTES[@]}" --verify-tag
+            gh release create "$TAG" --title "Bitty Buddies $TAG$([ "$TEST" = "true" ] && echo ' (test)')" "${NOTES[@]}" "${PRE[@]}" --verify-tag
             echo "inplace=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -70,8 +80,18 @@ jobs:
       - run: npm ci
 
       - name: Build and publish a new release
-        if: needs.tag.outputs.inplace != 'true'
+        if: needs.tag.outputs.inplace != 'true' && needs.tag.outputs.test != 'true'
         run: npx electron-builder --publish always
+
+      # Test versions go onto the pre-release made above (electron-builder won't publish onto a pre-release).
+      - name: Build and upload a test version
+        if: needs.tag.outputs.inplace != 'true' && needs.tag.outputs.test == 'true'
+        shell: bash
+        run: |
+          npx electron-builder --publish never
+          shopt -s nullglob
+          files=(dist/*.exe dist/*.blockmap dist/latest*.yml)
+          gh release upload "${{ needs.tag.outputs.tag }}" "${files[@]}" --clobber --repo "$GITHUB_REPOSITORY"
 
       # A copy with a fixed name, so the website can link straight to the newest installer.
       - name: Add a stable-named installer
@@ -102,18 +122,23 @@ jobs:
           ref: ${{ needs.tag.outputs.tag }}
       - name: Post to Discord
         env:
-          WEBHOOK: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
+          UPDATES: ${{ secrets.DISCORD_UPDATES_WEBHOOK }}
+          TESTERS: ${{ secrets.DISCORD_TESTERS_WEBHOOK }}
+          TEST: ${{ needs.tag.outputs.test }}
           TAG: ${{ needs.tag.outputs.tag }}
         run: |
-          if [ -z "$WEBHOOK" ]; then echo "No DISCORD_UPDATES_WEBHOOK secret; skipping"; exit 0; fi
+          if [ "$TEST" = "true" ]; then WEBHOOK="$TESTERS"; else WEBHOOK="$UPDATES"; fi
+          if [ -z "$WEBHOOK" ]; then echo "No Discord webhook secret for this channel; skipping"; exit 0; fi
           URL="https://wigglecodes.github.io/bitty-buddies/"
           NOTES="Your app will update itself next time it checks. New here? Grab it from the link above."
-          if [ -f "release-notes/$TAG.md" ]; then NOTES="$(tail -n +2 "release-notes/$TAG.md" | head -c 3800)"; fi
-          jq -n --arg tag "$TAG" --arg url "$URL" --arg notes "$NOTES" '{
+          if [ "$TEST" = "true" ]; then NOTES="A new test version is ready. If you've ticked **Get early test versions** in the tray menu, it'll arrive by itself. Spot anything odd? Use **Report a problem…** in the tray."; fi
+          if [ -f "release-notes/$TAG.md" ]; then NOTES="$NOTES"$'\n\n'"$(tail -n +2 "release-notes/$TAG.md" | head -c 3500)"; fi
+          if [ "$TEST" = "true" ]; then TITLE="🧪 Test version $TAG is ready"; else TITLE="🆕 Bitty Buddies $TAG is out!"; fi
+          jq -n --arg title "$TITLE" --arg url "$URL" --arg notes "$NOTES" '{
             username: "Bitty Buddies",
             avatar_url: "https://wigglecodes.github.io/bitty-buddies/icon.png",
             embeds: [{
-              title: ("🆕 Bitty Buddies " + $tag + " is out!"),
+              title: $title,
               url: $url,
               description: $notes,
               color: 7126606

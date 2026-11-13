@@ -31,7 +31,8 @@ const itemUnlocked = id => !!ITEMS[id] && packUnlocked(ITEMS[id].pack);
 const unlockedPackFiles = () => PACKS.filter(packUnlocked).map(p => p.file);
 
 // ---------- settings ----------
-const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false, mischief: true, shareStats: true, stats: {} };
+const DEFAULTS = { things: [{ id: 'critters/pup' }, { id: 'critters/kit' }], scale: 4, hidden: false, mischief: true, shareStats: true, stats: {}, beta: false };
+const IS_TEST_BUILD = !!(pkg.bitty && pkg.bitty.channel === 'test');
 let settings = { ...DEFAULTS };
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 
@@ -347,7 +348,7 @@ function spawnMenu(kind) {
 function buildTrayMenu() {
   const sizes = [['Small', 3], ['Medium', 4], ['Large', 6], ['Huge', 8]];
   const menu = Menu.buildFromTemplate([
-    { label: `Bitty Buddies v${app.getVersion()}`, enabled: false },
+    { label: `Bitty Buddies v${app.getVersion()}${IS_TEST_BUILD ? ' (test version)' : ''}`, enabled: false },
     { type: 'separator' },
     { label: 'Spawn', submenu: spawnMenu('pet') },
     { label: 'Build', submenu: spawnMenu('build') },
@@ -399,6 +400,7 @@ function buildTrayMenu() {
     readyVersion
       ? { label: `🎉 Restart to update to v${readyVersion}`, click: () => setImmediate(() => autoUpdater.quitAndInstall()) }
       : { label: 'Check for updates…', click: () => checkForUpdates(true) },
+    { label: 'Get early test versions', type: 'checkbox', checked: !!settings.beta, click: i => setBeta(i.checked) },
     { label: 'Report a problem…', click: openReportWindow },
     { label: 'Service status', click: () => shell.openExternal(STATUS_PAGE) },
     { label: 'Quit', click: () => app.quit() }
@@ -475,12 +477,29 @@ function setupUpdates() {
   powerMonitor.on('unlock-screen', () => setTimeout(autoCheck, 15000));
 }
 
+// Testers: early test versions arrive as normal updates. Everyone else only ever gets finished releases.
+async function setBeta(on) {
+  if (on) {
+    const r = await dialog.showMessageBox({
+      type: 'question', buttons: ['Join testing', 'Cancel'], defaultId: 0, cancelId: 1,
+      message: 'Get early test versions?',
+      detail: 'You’ll get new versions before everyone else, so you can try them out. They might have the odd bug. If something goes wrong, use “Report a problem…” in this menu.\n\nTurning this off later keeps you on your current version until the next finished release comes out.'
+    });
+    if (r.response !== 0) { buildTrayMenu(); return; }
+  }
+  settings.beta = on;
+  saveSettings();
+  buildTrayMenu();
+  if (on) checkForUpdates(false);
+}
+
 function checkForUpdates(manual) {
   if (!app.isPackaged || !autoUpdater) {
     if (manual) dialog.showMessageBox({ type: 'info', message: 'Updates only work in the installed app.' });
     return;
   }
   manualCheck = manual;
+  autoUpdater.allowPrerelease = !!settings.beta;   // test versions are GitHub pre-releases
   autoUpdater.checkForUpdates().catch(() => {});
 }
 
