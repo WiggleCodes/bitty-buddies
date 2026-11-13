@@ -10,6 +10,7 @@
     { id: 'home', label: 'Home', href: './' },
     { id: 'packs', label: 'Packs', href: 'packs.html' },
     { id: 'team', label: 'Team', href: 'team.html' },
+    { id: 'members', label: 'Members', href: 'members.html' },
     { id: 'status', label: 'Status', href: 'status.html' },
     { id: 'account', label: 'Account', href: 'account.html' }
     // { id: 'faq', label: 'FAQ', href: 'faq.html' },
@@ -47,7 +48,7 @@
     const close = () => { panel.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
     btn.addEventListener('click', () => { const open = panel.hidden; panel.hidden = !open; btn.setAttribute('aria-expanded', String(open)); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) { close(); btn.focus(); } });
-    matchMedia('(min-width: 861px)').addEventListener('change', e => { if (e.matches) close(); });
+    matchMedia('(min-width: 1081px)').addEventListener('change', e => { if (e.matches) close(); });
   }
 
   // ---------- live status light ----------

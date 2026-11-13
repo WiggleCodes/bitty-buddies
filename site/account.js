@@ -62,6 +62,11 @@
       img.src = u.discord.avatar;
     } else { img.hidden = true; box.classList.remove('photo'); }
 
+    const pb = $('p-badges');
+    pb.textContent = '';
+    for (const id of u.shownBadges || []) { const b = (data.badges || []).find(x => x.id === id); if (b) pb.appendChild(BBBadge(b)); }
+    $('show-me').checked = !u.hidden;
+
     const list = $('keys');
     list.textContent = '';
     $('no-keys').hidden = data.keys.length > 0;
@@ -141,6 +146,10 @@
     const d = await call('/account/discord/link', 'POST');
     location.href = d.url;
   }));
+  $('show-me').addEventListener('change', e => {
+    const box = e.currentTarget;
+    busy(box, async () => { const d = await call('/account/visibility', 'POST', { hidden: !box.checked }); render(d); say(d.message, true); });
+  });
   $('discord-unlink').addEventListener('click', e => busy(e.currentTarget, async () => {
     const d = await call('/account/discord/unlink', 'POST');
     render(d); say(d.message, true);
