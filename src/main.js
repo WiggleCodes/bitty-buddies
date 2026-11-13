@@ -1,4 +1,5 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain, screen, nativeImage, dialog, shell, powerMonitor } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, screen, nativeImage, dialog, shell, powerMonitor, net } = require('electron');
+const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const pkg = require('../package.json');
@@ -183,6 +184,56 @@ ipcMain.handle('licence:activate', async (_e, key) => {
 ipcMain.handle('licence:remove', async (_e, id) => { await licence.remove(id); refreshUnlocks(); return licenceStatus(); });
 ipcMain.on('licence:close', () => { if (licenceWin) licenceWin.close(); });
 
+// ---------- report a problem ----------
+const REPORT_URL = (pkg.bitty && pkg.bitty.reportUrl) || '';
+let reportWin = null;
+
+function openReportWindow() {
+  if (reportWin) { reportWin.show(); reportWin.focus(); return; }
+  reportWin = new BrowserWindow({
+    width: 500, height: 700, resizable: false, minimizable: false, maximizable: false,
+    fullscreenable: false, title: 'Report a problem', alwaysOnTop: true, show: false,
+    autoHideMenuBar: true,
+    webPreferences: { preload: path.join(__dirname, 'report-window', 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true }
+  });
+  reportWin.loadFile(path.join(__dirname, 'report-window', 'report.html'));
+  reportWin.once('ready-to-show', () => reportWin.show());
+  reportWin.on('closed', () => { reportWin = null; });
+  if (IS_MAC) app.focus({ steal: true });
+}
+
+// What gets sent with a report when "Include app details" is ticked. Nothing personal.
+function reportDetails() {
+  return {
+    version: app.getVersion(),
+    os: `${process.platform === 'win32' ? 'Windows' : process.platform} ${os.release()} (${process.arch})`,
+    packs: PACKS.filter(p => !p.hidden && packUnlocked(p)).map(p => p.name || p.id).join(', '),
+    size: `${settings.scale}x`,
+    things: String(settings.things.length),
+    settings: `hidden ${settings.hidden ? 'on' : 'off'}, mischief ${settings.mischief ? 'on' : 'off'}, screens ${screen.getAllDisplays().length}`
+  };
+}
+
+ipcMain.handle('report:details', () => reportDetails());
+ipcMain.handle('report:send', async (_e, data) => {
+  const msg = String((data && data.message) || '').trim().slice(0, 2000);
+  if (msg.length < 10) return { error: 'Describe the problem in a few more words.' };
+  if (!REPORT_URL) return { error: 'Reporting isn’t set up in this version.' };
+  try {
+    const res = await net.fetch(REPORT_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: msg, contact: String((data && data.contact) || '').slice(0, 120), details: data && data.include ? reportDetails() : {} })
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) return { error: out.error || `The report server said no (${res.status}). Try again later.` };
+    return { ok: true };
+  } catch {
+    return { error: "Couldn't reach the report server. Check you're online and try again." };
+  }
+});
+ipcMain.on('report:close', () => { if (reportWin) reportWin.close(); });
+
 ipcMain.on('thing-menu', (_e, { uid, id }) => {
   const item = ITEMS[id];
   if (!item || !win) return;
@@ -273,6 +324,7 @@ function buildTrayMenu() {
     readyVersion
       ? { label: `🎉 Restart to update to v${readyVersion}`, click: () => setImmediate(() => autoUpdater.quitAndInstall()) }
       : { label: 'Check for updates…', click: () => checkForUpdates(true) },
+    { label: 'Report a problem…', click: openReportWindow },
     { label: 'Quit', click: () => app.quit() }
   ]);
   tray.setContextMenu(menu);

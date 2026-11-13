@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'">
+  <title>Report a problem</title>
+  <style>
+    :root { --sky: #8FCBF0; --grass: #6CBE4E; --dirt: #7C573A; --ink: #2E345C; --card: #FFFDF6; --red: #C8392F; --ok: #3C8A2D; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font: 14px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; color: var(--ink);
+      background: linear-gradient(var(--sky) 0 86%, var(--grass) 86% 89%, var(--dirt) 89%);
+      display: flex; align-items: safe center; justify-content: center; padding: 14px 0; user-select: none; }
+    .card { width: 420px; background: var(--card); border: 4px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); padding: 20px; }
+    h1 { margin: 0 0 4px; font-size: 18px; letter-spacing: 1px; }
+    p { margin: 0 0 12px; }
+    label { display: block; font-weight: bold; margin: 10px 0 4px; }
+    textarea, input[type=text] { width: 100%; font: inherit; padding: 8px 10px; border: 3px solid var(--ink); background: #fff; outline: none; user-select: text; }
+    textarea { height: 110px; resize: none; }
+    textarea:focus, input[type=text]:focus { border-color: #3C74E0; }
+    .count { text-align: right; font-size: 12px; opacity: .7; margin-top: 2px; }
+    .check { display: flex; gap: 8px; align-items: flex-start; font-weight: normal; font-size: 13px; margin-top: 10px; cursor: pointer; }
+    .check input { margin-top: 3px; }
+    details { font-size: 12px; margin-top: 4px; opacity: .8; }
+    details pre { white-space: pre-wrap; margin: 6px 0 0; padding: 6px 8px; background: #EEF1F6; border: 2px solid var(--ink); user-select: text; }
+    .row { display: flex; gap: 10px; margin-top: 14px; }
+    button { flex: 1; font: inherit; font-weight: bold; padding: 10px; border: 3px solid var(--ink); background: var(--grass);
+      color: #fff; text-shadow: 2px 2px 0 var(--ink); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; }
+    button.alt { background: #B8C0CC; }
+    button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+    button:disabled { opacity: .6; cursor: wait; }
+    .msg { min-height: 20px; margin-top: 12px; font-size: 13px; }
+    .err { color: var(--red); } .good { color: var(--ok); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="form">
+      <h1>🐞 Report a problem</h1>
+      <p>Something not working right? Tell us what happened and we'll take a look.</p>
+      <label for="message">What went wrong?</label>
+      <textarea id="message" maxlength="2000" placeholder="e.g. My pup walks off the edge of my second screen and never comes back." autofocus></textarea>
+      <div class="count"><span id="count">0</span> / 2000</div>
+      <label for="contact">How can we reach you? (optional)</label>
+      <input id="contact" type="text" maxlength="120" placeholder="Your Discord name or email" spellcheck="false" autocomplete="off">
+      <label class="check"><input id="include" type="checkbox" checked> Include app details (version, Windows version, packs and settings). No files or personal info.</label>
+      <details><summary>See what's included</summary><pre id="preview"></pre></details>
+      <div class="row">
+        <button id="send">Send report</button>
+        <button id="close" class="alt">Cancel</button>
+      </div>
+      <div id="msg" class="msg"></div>
+    </div>
+    <div id="thanks" class="hidden">
+      <h1>💌 Thanks!</h1>
+      <p>Your report has been sent. If you left a way to reach you, we may get in touch.</p>
+      <p>For quicker help, you can also ask in the Bitty Buddies Discord.</p>
+      <div class="row"><button id="done">Close</button></div>
+    </div>
+  </div>
+  <script src="report.js"></script>
+</body>
+</html>
