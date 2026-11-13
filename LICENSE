@@ -8,12 +8,14 @@ for personal, private, educational or non-commercial use.
 
 YOU MAY:
   - View and read the source code on GitHub.
+  - Use, display and fork the repository on GitHub, only as GitHub's Terms of
+    Service allow for public repositories (see "GitHub's terms" below).
 
 YOU MAY NOT, without prior written permission from WiggleCodes:
   - Use, run, build, compile or install the source code, or any part of it,
-    for any purpose, including personal or non-commercial use.
-  - Download, clone or keep copies of the source code, except the temporary
-    copy your browser makes to display it.
+    outside GitHub, for any purpose, including personal or non-commercial use.
+  - Download, clone or keep copies of the source code outside GitHub, except
+    the temporary copy your browser makes to display it.
   - Copy, reproduce or reuse the Software, in whole or in part.
   - Modify, adapt, translate or create derivative works based on the Software.
   - Claim the Software, or any part of it, as your own work, or remove or alter
@@ -26,8 +28,14 @@ Official releases of the Bitty Buddies app, downloaded from the official
 Bitty Buddies website, are not covered by the restrictions on using the source
 code above, and may be installed and used by end users as published.
 
-Forking this repository on GitHub, where GitHub's Terms of Service allow it,
-does not grant any of the rights listed above.
+GITHUB'S TERMS
+Because this repository is public, GitHub's Terms of Service give every GitHub
+user a licence to use, display and perform its content through GitHub, and to
+reproduce it solely on GitHub as GitHub's features allow (for example, by
+forking). Nothing in this licence takes away those rights. They do not extend
+beyond GitHub, and a fork carries no other rights: everything listed under
+"YOU MAY NOT" still applies to the code in any fork. This notice must be kept
+in every fork.
 
 For permission requests, contact WiggleCodes via https://github.com/WiggleCodes.
 
