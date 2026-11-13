@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Bitty Buddies account</title>
+  <meta name="description" content="Sign in to your Bitty Buddies account to see and copy your licence keys.">
+  <meta property="og:title" content="Bitty Buddies">
+  <meta property="og:description" content="Tiny pixel pets that wander along the bottom of your screen.">
+  <meta property="og:image" content="banner.png">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=202611122256">
+</head>
+<body class="account-page" data-page="account">
+  <header id="site-header"></header>
+  <script src="chrome.js?v=202611122256"></script>
+
+  <main>
+    <section class="layer dirt">
+      <div class="wrap">
+        <h1 class="page-title">Your account</h1>
+        <p class="lede" id="account-lede">Sign in to see your licence keys. Switched to a new PC? Your keys are saved here, ready to copy.</p>
+        <p class="account-msg" id="msg" role="alert" hidden></p>
+
+        <!-- signed out -->
+        <div class="auth-card" id="signed-out" hidden>
+          <a class="btn discord auth-discord" id="discord-signin" href="#">Continue with Discord</a>
+          <p class="auth-or"><span>or use a username</span></p>
+          <div class="auth-tabs" role="tablist">
+            <button type="button" role="tab" id="tab-in" aria-selected="true" aria-controls="form-in">Sign in</button>
+            <button type="button" role="tab" id="tab-up" aria-selected="false" aria-controls="form-up">Create account</button>
+          </div>
+          <form id="form-in" class="auth-form" role="tabpanel" aria-labelledby="tab-in">
+            <label for="in-user">Username</label>
+            <input id="in-user" autocomplete="username" spellcheck="false" autocapitalize="none" required>
+            <label for="in-pass">Password</label>
+            <input id="in-pass" type="password" autocomplete="current-password" required>
+            <button class="btn grass" type="submit">Sign in</button>
+            <p class="auth-note">Forgotten your password? Ask on the <a href="https://discord.gg/aCHyjABJG7">Discord</a> and an admin will reset it for you.</p>
+          </form>
+          <form id="form-up" class="auth-form" role="tabpanel" aria-labelledby="tab-up" hidden>
+            <label for="up-user">Choose a username</label>
+            <input id="up-user" autocomplete="username" spellcheck="false" autocapitalize="none" minlength="3" maxlength="20" pattern="[A-Za-z0-9_.\-]{3,20}" required>
+            <p class="field-hint">3 to 20 letters, numbers, dots, dashes or underscores.</p>
+            <label for="up-pass">Choose a password</label>
+            <input id="up-pass" type="password" autocomplete="new-password" minlength="8" required>
+            <p class="field-hint">At least 8 characters. A short phrase works well.</p>
+            <button class="btn grass" type="submit">Create account</button>
+            <p class="auth-note">We only store your username and a scrambled copy of your password. No email needed.</p>
+          </form>
+        </div>
+
+        <!-- signed in -->
+        <div id="signed-in" hidden>
+          <div class="change-banner" id="must-change" hidden>
+            <strong>Pick a new password.</strong> You signed in with a temporary password, so please set your own below.
+          </div>
+          <div class="account-grid">
+            <aside class="profile-card">
+              <div class="profile-avatar" data-avatar="critters/pup"><img alt="" hidden></div>
+              <strong class="profile-name" id="p-name"></strong>
+              <span class="profile-sub" id="p-sub"></span>
+              <button class="btn stone small" id="sign-out" type="button">Sign out</button>
+            </aside>
+
+            <div class="account-main">
+              <section class="panel">
+                <h2>Your licence keys</h2>
+                <ul class="key-list" id="keys"></ul>
+                <p class="empty-keys" id="no-keys" hidden>No keys yet. When you buy a pack, we'll add your key to this account and it'll show up here.</p>
+                <details class="how">
+                  <summary>How do I use my key?</summary>
+                  <ol>
+                    <li>Click the little dog in your system tray, by the clock.</li>
+                    <li>Choose <strong>Sign in to restore my packs…</strong> and sign in. Or choose <strong>Enter licence key…</strong> and paste the key.</li>
+                    <li>Your packs unlock straight away.</li>
+                  </ol>
+                </details>
+              </section>
+
+              <section class="panel">
+                <h2>Sign-in options</h2>
+                <div class="option-row">
+                  <div><strong>Discord</strong><span id="discord-state"></span></div>
+                  <button class="btn discord small" id="discord-link" type="button">Link Discord</button>
+                  <button class="btn stone small" id="discord-unlink" type="button" hidden>Unlink</button>
+                </div>
+                <form class="option-form" id="pw-form">
+                  <strong id="pw-title">Change password</strong>
+                  <div class="pw-fields">
+                    <label class="pw-current">Current password <input id="pw-current" type="password" autocomplete="current-password"></label>
+                    <label>New password <input id="pw-next" type="password" autocomplete="new-password" minlength="8" required></label>
+                  </div>
+                  <button class="btn grass small" type="submit">Save password</button>
+                </form>
+              </section>
+
+              <section class="panel danger-zone">
+                <h2>Delete account</h2>
+                <p>This removes your account and sign-in. Keys you already use keep working in the app, but they won't be saved here any more.</p>
+                <form id="del-form" class="option-form">
+                  <label>Type your username to confirm <input id="del-confirm" autocomplete="off" spellcheck="false"></label>
+                  <button class="btn danger small" type="submit">Delete my account</button>
+                </form>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer" class="bedrock site-footer"></footer>
+  <script src="js/pixel.js?v=202611122256"></script>
+  <script src="js/packs/critters.js?v=202611122256"></script>
+  <script src="site.js?v=202611122256"></script>
+  <script src="account.js?v=202611122256"></script>
+</body>
+</html>

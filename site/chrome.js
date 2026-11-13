@@ -10,7 +10,8 @@
     { id: 'home', label: 'Home', href: './' },
     { id: 'packs', label: 'Packs', href: 'packs.html' },
     { id: 'team', label: 'Team', href: 'team.html' },
-    { id: 'status', label: 'Status', href: 'status.html' }
+    { id: 'status', label: 'Status', href: 'status.html' },
+    { id: 'account', label: 'Account', href: 'account.html' }
     // { id: 'faq', label: 'FAQ', href: 'faq.html' },
   ];
   const ELSEWHERE = [
@@ -85,7 +86,7 @@
         <nav class="foot-col" aria-label="Community"><h2>Community</h2>${ELSEWHERE.map(out).join('')}</nav>
         <div class="foot-legal">
           <p>© 2026 WiggleCodes. All rights reserved. The code is public to read, not to copy or re-upload.</p>
-          <p>Privacy: the app sends an anonymous "+1" once a day so we can count users. No name, ID or files are sent, and you can turn it off in the tray menu. If you use “Report a problem…”, we only get what you type and, if you leave it ticked, basic app details like the version and your Windows version.</p>
+          <p>Privacy: the app sends an anonymous "+1" once a day so we can count users. No name, ID or files are sent, and you can turn it off in the tray menu. If you use “Report a problem…”, we only get what you type and, if you leave it ticked, basic app details like the version and your Windows version. If you make an account, we store your username, a scrambled copy of your password, and your Discord name and picture if you link Discord. You can delete your account at any time.</p>
         </div>
       </div>`;
   };
